@@ -11,7 +11,7 @@ contract FinalizeRound is YUSDSetup {
 
     function testFuzz_ShouldPayOutRoundRewards(uint256 amount) public {
         amount = bound(amount, 1, MINT_AMOUNT);
-        yusd.stake(address(this), amount, mockData);
+        yusd.stake(address(this), uint96(amount), mockData);
         skip(roundDuration);
 
         uint256 balanceBeforeAdmin = rusd.balanceOf(address(this));

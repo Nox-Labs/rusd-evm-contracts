@@ -15,7 +15,7 @@ remappings = [
 
 fs_permissions = [
     { access = "read-write", path = "./"},
-    { access = "none", path = ".env"} 
+    { access = "none", path = ".env"} # TODO: check if it overrides previous rule
 ]
 
 [fmt]

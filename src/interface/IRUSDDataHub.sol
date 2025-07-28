@@ -16,8 +16,8 @@ interface IRUSDDataHub {
     function setOmnichainAdapter(address _omnichainAdapter) external;
 
     event AdminChanged(address admin);
+    event MinterChanged(address minter);
 
-    error InvalidChainIdForYUSD();
     error AlreadySet();
 }
 

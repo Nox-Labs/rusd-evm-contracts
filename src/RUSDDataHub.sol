@@ -72,10 +72,12 @@ contract RUSDDataHub is IRUSDDataHub, PausableUpgradeable, UUPSUpgradeable, Base
 
     function setAdmin(address _admin) public onlyAdmin {
         _getRUSDDataHubStorage().admin = _admin;
+        emit AdminChanged(_admin);
     }
 
     function setMinter(address _minter) public onlyAdmin {
         _getRUSDDataHubStorage().minter = _minter;
+        emit MinterChanged(_minter);
     }
 
     function pause() public onlyAdmin {

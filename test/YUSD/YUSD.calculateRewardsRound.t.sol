@@ -118,7 +118,7 @@ contract CalculateRewardsRound is YUSDSetup {
         rusd.mint(attacker, MINT_AMOUNT * 100, mockData);
 
         // Make sure only the attacker has tokens to isolate the test case.
-        yusd.redeem(user, yusd.balanceOf(user), mockData);
+        yusd.redeem(user, uint96(yusd.balanceOf(user)), mockData);
         assertEq(yusd.balanceOf(attacker), MINT_AMOUNT);
 
         // ATTACK PART 1: Claim rewards in the middle of the round.

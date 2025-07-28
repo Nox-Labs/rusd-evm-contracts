@@ -77,7 +77,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
 
     /* ======== MUTATIVE ======== */
 
-    function stake(address user, uint256 amount, bytes calldata data)
+    function stake(address user, uint96 amount, bytes calldata data)
         external
         updateRoundTimestamps
         onlyMinter
@@ -86,19 +86,19 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         noZeroAddress(user)
     {
         _getRusd().safeTransferFrom(msg.sender, address(this), amount);
-        _transfer(address(0), user, uint96(amount));
+        _transfer(address(0), user, amount);
 
         emit Stake(user, amount, data);
     }
 
-    function redeem(address user, uint256 amount, bytes calldata data)
+    function redeem(address user, uint96 amount, bytes calldata data)
         external
         updateRoundTimestamps
         onlyMinter
         noPause
         noZeroAmount(amount)
     {
-        _transfer(user, address(0), uint96(amount));
+        _transfer(user, address(0), amount);
         _getRusd().safeTransfer(msg.sender, amount);
 
         emit Redeem(user, amount, data);
@@ -206,6 +206,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         internal
         noPause
         noZeroAddress(to)
+        noZeroAmount(amount)
     {
         _roundInfo[roundId].claimedRewards[user] += amount;
         debt -= int256(amount);
@@ -234,7 +235,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
 
     /* ======== ADMIN ======== */
 
-    function changeNextRoundDuration(uint32 duration) external onlyAdmin {
+    function changeNextRoundDuration(uint32 duration) external noZeroAmount(duration) onlyAdmin {
         uint32 nextRoundId = getCurrentRoundId() + 1;
         _roundInfo[nextRoundId].duration = duration;
 
@@ -242,6 +243,8 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
     }
 
     function changeNextRoundBp(uint32 bp) external onlyAdmin {
+        if (bp > BP_PRECISION) revert InvalidBp();
+
         uint32 nextRoundId = getCurrentRoundId() + 1;
         _roundInfo[nextRoundId].bp = bp;
 
@@ -260,7 +263,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
 
         uint256 totalRewards = calculateTotalRewardsRound(roundId);
 
-        _getRusd().transferFrom(msg.sender, address(this), totalRewards);
+        _getRusd().safeTransferFrom(msg.sender, address(this), totalRewards);
 
         emit RoundFinalized(roundId, totalRewards);
     }

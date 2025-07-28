@@ -69,7 +69,6 @@ abstract contract Blacklistable is Initializable {
 
     event Blacklisted(address indexed account);
     event UnBlacklisted(address indexed account);
-    event BlacklisterChanged(address indexed newBlacklister);
 
     /* ======== ERRORS ======== */
 

@@ -23,7 +23,7 @@ import "test/_utils/LayerZeroDevtoolsHelper.sol";
 contract BaseSetup is LayerZeroDevtoolsHelper {
     using RusdDeployer for address;
 
-    uint256 public constant MINT_AMOUNT = 1e6;
+    uint96 public constant MINT_AMOUNT = 1e6;
     uint32 public constant ROUND_BP = 1e4;
 
     bytes public constant mockData = "mock";

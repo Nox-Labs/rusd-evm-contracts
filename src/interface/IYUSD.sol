@@ -4,8 +4,8 @@ pragma solidity ^0.8.20;
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 interface IYUSD is IERC20Metadata {
-    function stake(address user, uint256 amount, bytes calldata data) external;
-    function redeem(address user, uint256 amount, bytes calldata data) external;
+    function stake(address user, uint96 amount, bytes calldata data) external;
+    function redeem(address user, uint96 amount, bytes calldata data) external;
 
     function claimRewards(uint32 roundId, address user, address to, uint256 amount) external;
     function claimRewards(uint32 roundId, address user, address to)
@@ -36,6 +36,7 @@ interface IYUSD is IERC20Metadata {
     error RoundNotEnded();
     error RoundAlreadyFinalized();
     error InsufficientRewards(uint256 amount, uint256 claimableRewards);
+    error InvalidBp();
 
     event Stake(address indexed user, uint256 amount, bytes data);
     event Redeem(address indexed user, uint256 amount, bytes data);

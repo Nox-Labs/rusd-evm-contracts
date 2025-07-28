@@ -12,7 +12,7 @@ contract Redeem is YUSDSetup {
         amount = bound(amount, 1, MINT_AMOUNT);
 
         uint256 totalSupplyYUSDBefore = yusd.totalSupply();
-        yusd.redeem(address(this), amount, mockData);
+        yusd.redeem(address(this), uint96(amount), mockData);
         uint256 balanceAfterYUSD = yusd.balanceOf(address(this));
         assertEq(balanceAfterYUSD, totalSupplyYUSDBefore - amount);
     }
