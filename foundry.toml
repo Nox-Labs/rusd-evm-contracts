@@ -1,0 +1,52 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib", "node_modules"]
+ast = true
+
+evm_version = "shanghai" # simulation may be false positive on bsc (PUSH0 opcode support)
+
+optimizer=true
+optimizer_runs=1000000
+
+remappings = [
+    "forge-std/=./lib/forge-std/src/",
+]
+
+fs_permissions = [
+    { access = "read-write", path = "./"},
+    { access = "none", path = ".env"} 
+]
+
+[fmt]
+line_length = 100
+
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+[rpc_endpoints]
+# Name "ethereum" breaks foundry configuration!
+mainnet = "${ETHEREUM_RPC}"
+arbitrum = "${ARBITRUM_RPC}"
+polygon = "${POLYGON_RPC}"
+optimism = "${OPTIMISM_RPC}"
+base = "${BASE_RPC}"
+bsc = "${BSC_RPC}"
+avalanche = "${AVALANCHE_RPC}"
+mantle = "${MANTLE_RPC}"
+metis = "${METIS_RPC}"
+sei = "${SEI_RPC}"
+sepolia = "${SEPOLIA_RPC}"
+anvil = "http://127.0.0.1:8545"
+[etherscan]
+mainnet = { key = "${ETHEREUM_TOKEN}", chain = 1, url = "https://api.etherscan.io/api" }
+arbitrum = { key = "${ARBITRUM_TOKEN}", chain = 42161, url = "https://api.arbiscan.io/api" }
+polygon = { key = "${POLYGON_TOKEN}", chain = 137, url = "https://api.polygonscan.com/api" }
+optimism = { key = "${OPTIMISM_TOKEN}", chain = 10, url = "https://api-optimistic.etherscan.io/api" }
+base = { key = "${BASE_TOKEN}", chain = 8453, url = "https://api.basescan.org/api" }
+bsc = { key = "${BSC_TOKEN}", chain = 56, url = "https://api.bscscan.com/api" }
+avalanche = { key = "avascan", chain = 43114, url = "https://api.avascan.info/v2/network/mainnet/evm/43114/etherscan"}
+mantle = { key = "verifyContract", chain = 5000, url = "https://api.routescan.io/v2/network/mainnet/evm/5000/etherscan"}
+metis = { key = "verifyContract", chain = 1088, url = "https://api.routescan.io/v2/network/mainnet/evm/1088/etherscan" }
+sei = { key = "verifyContract", chain = 1329, url = "https://seitrace.com/pacific-1/api" }
+sepolia = { key = "${ETHEREUM_TOKEN}", chain = 11155111, url = "https://api-sepolia.etherscan.io/api" }

@@ -1,0 +1,33 @@
+{
+	"scripts": {
+		"lint": "npm run lint:src && npm run lint:test",
+		"lint:fix": "npx solhint -c src/.solhint.json --fix --noPrompt src/**/*.sol && npx solhint -c test/.solhint.json --fix --noPrompt test/**/*.sol",
+		"lint:src": "npx solhint -c src/.solhint.json src/**/*.sol",
+		"lint:src:fix": "npx solhint -c src/.solhint.json --fix src/**/*.sol",
+		"lint:test": "npx solhint -c test/.solhint.json test/**/*.sol",
+		"lint:test:fix": "npx solhint -c test/.solhint.json --fix test/**/*.sol",
+		"prepare": "npx husky",
+		"coverage": "forge coverage --ir-minimum --nmco \"test/*|script/*\"",
+		"coverage:lcov": "forge coverage --ir-minimum --nmco test --report lcov",
+		"slither": "sh slither.sh",
+		"deploy:create3factory": "forge script DeployCreate3Factory --sig 'run(uint32)' 11155111 --broadcast --verifier custom --verify",
+		"deploy:sepolia": "forge script Deploy --sig 'run(uint32)' 11155111 --broadcast --verifier custom --verify --slow",
+		"deploy:arbitrum": "forge script Deploy --sig 'run(uint32)' 42161 --broadcast --verifier custom --verify",
+		"deploy:bsc": "forge script Deploy --sig 'run(uint32)' 56 --broadcast --verifier custom --verify",
+		"wire-oapps": "forge script WireOApps --sig 'wireEVM(uint32[])' [42161, 56] --broadcast",
+		"wire-solana": "forge script WireOApps --sig 'wireSolana(uint32[], bytes32, uint32)' [11155111] 0x3a34e60a5762bcafdb4ef7388d23f168c752ce4b1b1275726a4b28737af7af56 103 --broadcast"
+	},
+	"dependencies": {
+		"@openzeppelin/contracts": "^5.3.0",
+		"@openzeppelin/contracts-upgradeable": "^5.3.0",
+		"@layerzerolabs/oapp-evm-upgradeable": "^0.1.2",
+		"@layerzerolabs/lz-evm-oapp-v2": "^3.0.112"
+	},
+	"devDependencies": {
+		"@0xcompose/sspec": "^1.0.9",
+		"@layerzerolabs/create3-factory": "^3.0.112",
+		"@layerzerolabs/test-devtools-evm-foundry": "^6.0.3",
+		"husky": "^9.0.10",
+		"solhint": "^5.0.3"
+	}
+}

@@ -1,0 +1,36 @@
+FROM python:3.9-slim
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    git \
+    python3-pip \
+    curl \
+    build-essential \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Foundry
+RUN curl -L https://foundry.paradigm.xyz | bash
+RUN /root/.foundry/bin/foundryup
+
+# Add Foundry to PATH
+ENV PATH="/root/.foundry/bin:${PATH}"
+
+# Install Slither
+RUN pip3 install slither-analyzer
+
+WORKDIR /code
+
+COPY lib .
+
+COPY package.json .
+COPY package-lock.json .
+
+RUN npm install
+
+COPY foundry.toml .
+COPY src src
+
+# Run Slither in triage mode
+ENTRYPOINT ["slither", ".", "--triage-mode", "--exclude-informational"]

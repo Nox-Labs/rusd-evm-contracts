@@ -1,0 +1,29 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "code-complexity": [
+      "warn",
+      4
+    ],
+    "function-max-lines": [
+      "warn",
+      30
+    ],
+    "foundry-test-functions": [
+      "warn",
+      [
+        "setUp"
+      ]
+    ],
+    "private-vars-leading-underscore": "off",
+    "no-unused-vars": "off",
+    "no-empty-blocks": "off",
+    "no-unused-import": "off",
+    "no-console": "off",
+    "compiler-version": "off",
+    "no-global-import": "off",
+    "func-visibility": "off",
+    "state-visibility": "off",
+    "func-name-mixedcase": "off"
+  }
+}
