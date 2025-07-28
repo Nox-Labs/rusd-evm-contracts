@@ -107,6 +107,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
     function claimRewards(uint32 roundId, address user, address to, uint256 amount)
         external
         updateRoundTimestamps
+        onlyMinter
         noZeroAmount(amount)
     {
         uint256 claimableRewards = calculateClaimableRewards(roundId, user);
@@ -120,6 +121,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
     function claimRewards(uint32 roundId, address user, address to)
         external
         updateRoundTimestamps
+        onlyMinter
         returns (uint256 rusdAmount)
     {
         rusdAmount = calculateClaimableRewards(roundId, user);
@@ -128,7 +130,11 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         emit RewardsClaimed(roundId, user, to, rusdAmount);
     }
 
-    function compoundRewards(uint32 roundId, address user) external updateRoundTimestamps {
+    function compoundRewards(uint32 roundId, address user)
+        external
+        updateRoundTimestamps
+        onlyMinter
+    {
         uint256 claimableRewards = calculateClaimableRewards(roundId, user);
         _claimRewards(roundId, user, claimableRewards, address(this));
         _transfer(address(0), user, uint96(claimableRewards));
