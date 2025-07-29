@@ -72,6 +72,5 @@ abstract contract Blacklistable is Initializable {
 
     /* ======== ERRORS ======== */
 
-    error NotBlacklister();
     error Blacklist(address account);
 }

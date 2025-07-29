@@ -79,7 +79,7 @@ contract RUSD is
     /* ======== MODIFIERS ======== */
     modifier validateData(bytes calldata data) {
         if (data.length == 0) revert DataLengthZero();
-        if (keccak256(data) == CROSS_CHAIN) revert CrossChainActionNotAllowed();
+        if (bytes32(data) == CROSS_CHAIN) revert CrossChainActionNotAllowed();
 
         _;
     }

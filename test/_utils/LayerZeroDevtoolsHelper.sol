@@ -10,8 +10,8 @@ function addressToBytes32(address _addr) pure returns (bytes32) {
 }
 
 contract LayerZeroDevtoolsHelper is TestHelperOz5 {
-    EndpointV2Mock endPointA;
-    EndpointV2Mock endPointB;
+    EndpointV2Mock public endPointA;
+    EndpointV2Mock public endPointB;
 
     uint32 eidA = 1;
     uint32 eidB = 2;

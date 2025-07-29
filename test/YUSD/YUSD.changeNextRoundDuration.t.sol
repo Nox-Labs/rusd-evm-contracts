@@ -14,11 +14,17 @@ contract ChangeNextRoundDuration is YUSDSetup {
         assertEq(duration, newDuration);
     }
 
-    function test_ShouldEmitRoundDurationChanged() public {
+    function test_ShouldEmitEvent() public {
         uint32 newDuration = 30 days;
 
         vm.expectEmit(true, true, true, true);
         emit IYUSD.RoundDurationChanged(currentRoundId + 1, newDuration);
         yusd.changeNextRoundDuration(newDuration);
+    }
+
+    function test_ShouldRevertIfNotAdmin() public {
+        vm.prank(user);
+        vm.expectRevert(Base.Unauthorized.selector);
+        yusd.changeNextRoundDuration(30 days);
     }
 }

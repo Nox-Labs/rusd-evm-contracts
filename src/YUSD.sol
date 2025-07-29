@@ -12,25 +12,27 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
-struct RoundInfo {
-    uint32 bp;
-    uint32 duration;
-    bool isFinalized;
-    mapping(address user => uint256 claimedRewards) claimedRewards;
-}
-
 contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
     using SafeERC20 for IRUSD;
+
+    struct RoundInfo {
+        uint32 bp;
+        uint32 duration;
+        bool isBpSet; // if the bp is set, it means that the admin has changed the bp for this round
+        bool isDurationSet; // if the duration is set, it means that the admin has changed the duration for this round
+        bool isFinalized;
+        mapping(address user => uint256 claimedRewards) claimedRewards;
+    }
 
     uint16 public constant BP_PRECISION = 1e4; // 1% = 100. BP stands for Basis Points.
     uint128 constant INTERNAL_MATH_PRECISION = 1e30;
 
     /**
      * @notice The total debt of the YUSD contract in RUSD to all users (not including the current round)
-     * @notice e.g. if the debt is +100, it means that the YUSD contract have a debt of 100 RUSD to allow all users to claim their rewards.
-     * @notice e.g. if the debt is -100, it means that the users in debt of 100 RUSD to the YUSD contract (round not ended yet and final total rewards is not calculated).
+     * @notice If totalDebt is positive, it means surplus of RUSD on YUSD contract. (All users can redeem and claim `totalDebt` as rewards) (If all users redeem and claim rewards, the debt will be zero)
+     * @notice If totalDebt is negative, it means shortfall of RUSD on YUSD contract. (All users can't redeem and claim whole rewards)
      */
-    int256 public debt;
+    int256 public totalDebt;
 
     /**
      * @notice The timestamps of the rounds.
@@ -49,7 +51,16 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         uint32 _firstRoundStartTimestamp,
         uint32 _roundBp,
         uint32 _roundDuration
-    ) external initializer {
+    )
+        external
+        initializer
+        noZeroAmount(_roundBp)
+        noZeroAmount(_roundDuration)
+        noZeroAmount(_periodLength)
+        noZeroAmount(_firstRoundStartTimestamp)
+    {
+        if (_roundBp > BP_PRECISION) revert InvalidBp();
+
         __TWAB_init(_periodLength, _firstRoundStartTimestamp);
         __RUSDDataHubKeeper_init(_rusdDataHub);
 
@@ -148,12 +159,6 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         return uint32(roundTimestamps.length - 2);
     }
 
-    function getTotalDebt() public view returns (int256) {
-        if (debt < 0) return debt;
-
-        return debt + int256(calculateTotalRewardsRound(getCurrentRoundId()));
-    }
-
     function getRoundPeriod(uint32 roundId) public view returns (uint32 start, uint32 end) {
         if (roundId > getCurrentRoundId()) revert RoundIdUnavailable();
 
@@ -183,20 +188,6 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         return _calculateRewardsForTwab(roundId, start, end, boundedEnd, totalTwabInRound);
     }
 
-    function getUserRewards(address user, uint32 start, uint32 end)
-        public
-        view
-        returns (uint256[] memory rewards)
-    {
-        uint32 currentRoundId = getCurrentRoundId();
-        if (end == type(uint32).max) end = currentRoundId;
-
-        rewards = new uint256[](end - start + 1);
-        for (uint32 i = start; i <= end; i++) {
-            rewards[i - start] = calculateRewardsRound(i, user);
-        }
-    }
-
     function getRoundInfo(uint32 roundId)
         public
         view
@@ -206,20 +197,20 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         return (round.bp, round.duration, round.isFinalized);
     }
 
-    /* ======== INTERNAL ======== */
+    /* ======== PRIVATE ======== */
 
     function _claimRewards(uint32 roundId, address user, uint256 amount, address to)
-        internal
+        private
         noPause
         noZeroAddress(to)
         noZeroAmount(amount)
     {
         _roundInfo[roundId].claimedRewards[user] += amount;
-        debt -= int256(amount);
+        totalDebt -= int256(amount);
         _getRusd().safeTransfer(to, amount);
     }
 
-    function _getBoundedEnd(uint32 end) internal view returns (uint32) {
+    function _getBoundedEnd(uint32 end) private view returns (uint32) {
         uint32 lastSafeTimestamp = uint32(currentOverwritePeriodStartedAt());
         uint32 boundedEnd = uint32(block.timestamp > end ? end : block.timestamp);
         return boundedEnd > lastSafeTimestamp ? lastSafeTimestamp : boundedEnd;
@@ -231,7 +222,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         uint32 end,
         uint256 boundedEnd,
         uint256 twabBalance
-    ) internal view returns (uint256) {
+    ) private view returns (uint256) {
         uint256 rewardPerSecond =
             Math.mulDiv(twabBalance * INTERNAL_MATH_PRECISION, _roundInfo[roundId].bp, end - start);
 
@@ -239,11 +230,39 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
             Math.mulDiv(rewardPerSecond, boundedEnd - start, BP_PRECISION * INTERNAL_MATH_PRECISION);
     }
 
+    /**
+     * @notice Start the next round.
+     * @dev This function is called when the current round is ended and the transaction triggered with `updateRoundTimestamps` modifier.
+     * @dev This function will create next round info base on previous round if admin didn't override it.
+     */
+    function _startNextRound() private {
+        uint32 currentRoundId = getCurrentRoundId();
+        uint32 nextRoundId = currentRoundId + 1;
+
+        (, uint32 end) = getRoundPeriod(currentRoundId);
+
+        RoundInfo storage nextRound = _roundInfo[nextRoundId];
+        RoundInfo storage currentRound = _roundInfo[currentRoundId];
+
+        uint32 nextRoundDuration = nextRound.duration;
+        uint32 nextRoundBp = nextRound.bp;
+
+        if (!nextRound.isDurationSet) nextRoundDuration = currentRound.duration;
+        if (!nextRound.isBpSet) nextRoundBp = currentRound.bp;
+
+        roundTimestamps.push(end + nextRoundDuration);
+        nextRound.bp = nextRoundBp;
+        nextRound.duration = nextRoundDuration;
+
+        emit NewRound(nextRoundId, end, end + nextRoundDuration);
+    }
+
     /* ======== ADMIN ======== */
 
     function changeNextRoundDuration(uint32 duration) external noZeroAmount(duration) onlyAdmin {
         uint32 nextRoundId = getCurrentRoundId() + 1;
         _roundInfo[nextRoundId].duration = duration;
+        _roundInfo[nextRoundId].isDurationSet = true;
 
         emit RoundDurationChanged(nextRoundId, duration);
     }
@@ -253,22 +272,30 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
 
         uint32 nextRoundId = getCurrentRoundId() + 1;
         _roundInfo[nextRoundId].bp = bp;
+        _roundInfo[nextRoundId].isBpSet = true;
 
         emit RoundBpChanged(nextRoundId, bp);
     }
 
+    /**
+     * @notice Finalize the round.
+     * @dev This function is called by admin to finalize the round.
+     * @dev This function will transfer the rewards to the YUSD contract from caller.
+     */
     function finalizeRound(uint32 roundId) external onlyAdmin {
         RoundInfo storage round = _roundInfo[roundId];
+
+        (, uint32 end) = getRoundPeriod(roundId);
 
         if (round.isFinalized) revert RoundAlreadyFinalized();
         round.isFinalized = true;
 
-        (, uint32 end) = getRoundPeriod(roundId);
-
         if (block.timestamp < end) revert RoundNotEnded();
 
-        uint256 totalRewards = calculateTotalRewardsRound(roundId);
+        if (!hasFinalized(end)) revert TwabNotFinalized();
 
+        uint256 totalRewards = calculateTotalRewardsRound(roundId);
+        totalDebt += int256(totalRewards);
         _getRusd().safeTransferFrom(msg.sender, address(this), totalRewards);
 
         emit RoundFinalized(roundId, totalRewards);
@@ -279,24 +306,14 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
     /* ======== MODIFIER ======== */
 
     modifier updateRoundTimestamps() {
-        uint32 currentRoundId = getCurrentRoundId();
-        (, uint32 end) = getRoundPeriod(currentRoundId);
+        (, uint32 end) = getRoundPeriod(getCurrentRoundId());
 
-        if (block.timestamp >= end) {
-            debt += int256(calculateTotalRewardsRound(currentRoundId));
-            uint32 nextRoundId = currentRoundId + 1;
+        while (block.timestamp >= end) {
+            _startNextRound();
 
-            uint32 nextRoundDuration = _roundInfo[nextRoundId].duration;
-            uint32 nextRoundBp = _roundInfo[nextRoundId].bp;
-
-            if (nextRoundDuration == 0) nextRoundDuration = _roundInfo[currentRoundId].duration;
-            if (nextRoundBp == 0) nextRoundBp = _roundInfo[currentRoundId].bp;
-
-            roundTimestamps.push(end + nextRoundDuration);
-            _roundInfo[nextRoundId].bp = nextRoundBp;
-
-            emit NewRound(nextRoundId, end, end + nextRoundDuration);
+            (, end) = getRoundPeriod(getCurrentRoundId());
         }
+
         _;
     }
 }

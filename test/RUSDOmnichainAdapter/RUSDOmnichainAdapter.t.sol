@@ -34,4 +34,28 @@ contract RUSDOmnichainAdapterTest is RUSDOmnichainAdapterSetup {
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
         adapter.initialize(address(rusdDataHub));
     }
+
+    /* ======== endpoint ======== */
+
+    function test_endpoint_ShouldReturnEndpoint() public view {
+        assertEq(address(adapter.endpoint()), address(endPointA));
+    }
+
+    /* ======== _bridgePong ======== */
+
+    function test_ShouldEmitEvent() public {
+        vm.recordLogs();
+        _bridge(endPointB, adapter2, MINT_AMOUNT);
+
+        bool isEventEmitted = false;
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        for (uint256 i = 0; i < entries.length; i++) {
+            if (entries[i].topics[0] == IRUSDOmnichainAdapter.BridgePong.selector) {
+                isEventEmitted = true;
+                break;
+            }
+        }
+        assertEq(isEventEmitted, true);
+    }
 }

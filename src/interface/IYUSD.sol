@@ -37,6 +37,7 @@ interface IYUSD is IERC20Metadata {
     error RoundAlreadyFinalized();
     error InsufficientRewards(uint256 amount, uint256 claimableRewards);
     error InvalidBp();
+    error TwabNotFinalized();
 
     event Stake(address indexed user, uint256 amount, bytes data);
     event Redeem(address indexed user, uint256 amount, bytes data);

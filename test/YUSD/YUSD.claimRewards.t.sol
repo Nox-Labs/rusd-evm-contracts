@@ -54,9 +54,39 @@ contract ClaimRewards is YUSDSetup {
     function test_RevertIfPaused() public {
         rusdDataHub.pause();
         vm.expectRevert(abi.encodeWithSelector(PausableUpgradeable.EnforcedPause.selector));
-        yusd.claimRewards(currentRoundId, address(this), address(this), 1);
-        vm.expectRevert(abi.encodeWithSelector(PausableUpgradeable.EnforcedPause.selector));
         yusd.claimRewards(currentRoundId, address(this), address(this));
+    }
+
+    function test_RevertIfPausedWhenAmountSpecified() public {
+        rusdDataHub.pause();
+        vm.expectRevert(abi.encodeWithSelector(PausableUpgradeable.EnforcedPause.selector));
+        yusd.claimRewards(currentRoundId, address(this), address(this), 1);
+    }
+
+    function test_RevertIfNotMinter() public {
+        vm.expectRevert(Base.Unauthorized.selector);
+        vm.prank(user);
+        yusd.claimRewards(currentRoundId, address(this), address(this));
+    }
+
+    function test_RevertIfNotMinterWhenAmountSpecified() public {
+        vm.expectRevert(Base.Unauthorized.selector);
+        vm.prank(user);
+        yusd.claimRewards(currentRoundId, address(this), address(this), 1);
+    }
+
+    function test_ShouldEmitEvent() public {
+        uint256 rewards = yusd.calculateClaimableRewards(currentRoundId, address(this));
+
+        vm.expectEmit(true, true, true, true);
+        emit IYUSD.RewardsClaimed(currentRoundId, address(this), address(this), rewards);
+        yusd.claimRewards(currentRoundId, address(this), address(this));
+    }
+
+    function test_ShouldEmitEventWhenAmountSpecified() public {
+        vm.expectEmit(true, true, true, true);
+        emit IYUSD.RewardsClaimed(currentRoundId, address(this), address(this), 1);
+        yusd.claimRewards(currentRoundId, address(this), address(this), 1);
     }
 
     function test_ShouldUpdateRoundTimestampAfterFirstRoundA() public test_roundTimestampModifier {

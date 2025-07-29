@@ -485,7 +485,7 @@ contract TWAB is Initializable, IERC20, Base {
      * @param time The timestamp to check
      * @return True if the given time is finalized, false if it's during the current overwrite period.
      */
-    function hasFinalized(uint256 time) external view returns (bool) {
+    function hasFinalized(uint256 time) public view returns (bool) {
         TWABStorage storage $ = _getTWABStorage();
         return TwabLib.hasFinalized($.periodLength, $.periodOffset, time);
     }

@@ -40,16 +40,16 @@ contract RUSDOmnichainAdapter is
 
     /* ======== BRIDGE ======== */
 
-    function bridgePing(Message calldata _payload, LzMessageMetadata memory _md) public payable {
-        if (_payload.to == bytes32(0)) revert ZeroAddress();
+    function bridgePing(Message calldata _msg, LzMessageMetadata memory _md) public payable {
+        if (_msg.to == bytes32(0)) revert ZeroAddress();
 
         IRUSD rusd = _getRusd();
-        rusd.safeTransferFrom(msg.sender, address(this), _payload.amount);
-        rusd.burn(_payload.amount);
+        rusd.safeTransferFrom(msg.sender, address(this), _msg.amount);
+        rusd.burn(_msg.amount);
 
-        MessagingReceipt memory receipt = _sendLzMessage(_payload, _md);
+        MessagingReceipt memory receipt = _sendLzMessage(_msg, _md);
 
-        emit BridgePing(receipt.guid, msg.sender, _payload, _md);
+        emit BridgePing(receipt.guid, msg.sender, _msg, _md);
     }
 
     function _bridgePong(bytes32 _guid, bytes calldata _encodedMessage) internal {

@@ -58,4 +58,73 @@ contract YUSDTest is YUSDSetup {
         assertEq(start1, end0);
         assertEq(end1 + 1, block.timestamp + roundDuration);
     }
+
+    /* ======== updateRoundTimestamps ======== */
+
+    function test_updateRoundTimestamps_ShouldUpdateRoundTimestamps() public {
+        uint32 roundId0 = currentRoundId;
+        uint32 roundId1 = currentRoundId + 1;
+
+        (uint32 bp0, uint32 duration0,) = yusd.getRoundInfo(roundId0);
+        (uint32 bp1, uint32 duration1,) = yusd.getRoundInfo(roundId1);
+
+        uint32 roundId1NewDuration = duration0 - 100;
+        uint32 roundId1NewBp = bp0 - 100;
+
+        assertNotEq(bp0, 0);
+        assertNotEq(duration0, 0);
+        assertEq(bp1, 0);
+        assertEq(duration1, 0);
+
+        yusd.changeNextRoundDuration(roundId1NewDuration);
+        yusd.changeNextRoundBp(roundId1NewBp);
+
+        skip(roundDuration);
+        yusd.stake(address(this), MINT_AMOUNT, mockData);
+
+        assertEq(yusd.getCurrentRoundId(), roundId1);
+
+        (, uint32 end0) = yusd.getRoundPeriod(roundId0);
+        (uint32 start1, uint32 end1) = yusd.getRoundPeriod(roundId1);
+
+        assertEq(start1, end0);
+        assertEq(end1, end0 + roundId1NewDuration);
+
+        (bp1, duration1,) = yusd.getRoundInfo(roundId1);
+
+        assertEq(bp1, roundId1NewBp);
+        assertEq(duration1, roundId1NewDuration);
+    }
+
+    /* ======== totalDebt ======== */
+
+    function testFuzz_totalDebt_ShouldDecreaseWhenRewardsAreClaimed(uint256 period) public {
+        period = bound(period, twabPeriodLength, roundDuration);
+
+        yusd.stake(address(this), MINT_AMOUNT, mockData);
+
+        int256 totalDebtBefore = yusd.totalDebt();
+        assertEq(totalDebtBefore, 0);
+
+        skip(period);
+
+        uint256 claimedRewards = yusd.claimRewards(currentRoundId, address(this), address(this));
+
+        int256 totalDebtAfter = yusd.totalDebt();
+
+        assertLt(totalDebtAfter, totalDebtBefore);
+        assertEq(totalDebtAfter, -int256(claimedRewards));
+    }
+
+    function test_totalDebt_ShouldIncreaseAfterRoundIsFinalized() public {
+        yusd.stake(address(this), MINT_AMOUNT, mockData);
+
+        skip(roundDuration);
+        yusd.claimRewards(currentRoundId, address(this), address(this));
+
+        assertEq(yusd.totalDebt(), -int256(yusd.calculateTotalRewardsRound(currentRoundId)));
+
+        yusd.finalizeRound(currentRoundId);
+        assertEq(yusd.totalDebt(), 0);
+    }
 }

@@ -9,7 +9,7 @@ contract FinalizeRound is YUSDSetup {
         rusd.mint(address(yusd), MINT_AMOUNT * 100, mockData);
     }
 
-    function testFuzz_ShouldPayOutRoundRewards(uint256 amount) public {
+    function testFuzz_ShouldFinalizeRound(uint256 amount) public {
         amount = bound(amount, 1, MINT_AMOUNT);
         yusd.stake(address(this), uint96(amount), mockData);
         skip(roundDuration);
@@ -26,21 +26,31 @@ contract FinalizeRound is YUSDSetup {
 
         assertEq(balanceAfterAdmin, balanceBeforeAdmin - totalRewards);
         assertEq(balanceAfterYUSD, balanceBeforeYUSD + totalRewards);
+
+        (,, bool isFinalized) = yusd.getRoundInfo(currentRoundId);
+
+        assertEq(isFinalized, true);
     }
 
     function test_RevertIfRoundNotEnded() public {
-        yusd.stake(address(this), 1, mockData);
-        skip(roundDuration * 2 - 1);
-
-        yusd.claimRewards(currentRoundId, address(this), address(this));
-
-        assertEq(yusd.getCurrentRoundId(), currentRoundId + 1);
-
         vm.expectRevert(IYUSD.RoundNotEnded.selector);
-        yusd.finalizeRound(1);
+        yusd.finalizeRound(currentRoundId);
     }
 
-    function test_ShouldEmitRoundRewardsPaidOut() public {
+    function test_RevertIfTwabNotFinalized() public {
+        uint32 breakDuration = 1000; // in base setup roundDuration end timestamp and twab finalize observation is the same, we need to break this to test the revert
+
+        yusd.changeNextRoundDuration(roundDuration + breakDuration);
+        skip(roundDuration);
+        yusd.finalizeRound(currentRoundId);
+        yusd.stake(address(this), MINT_AMOUNT, mockData);
+        skip(roundDuration + breakDuration);
+
+        vm.expectRevert(IYUSD.TwabNotFinalized.selector);
+        yusd.finalizeRound(currentRoundId + 1);
+    }
+
+    function test_ShouldEmitEvent() public {
         skip(roundDuration);
 
         uint256 totalRewards = yusd.calculateTotalRewardsRound(currentRoundId);

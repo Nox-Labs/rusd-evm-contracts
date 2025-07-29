@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "./_YUSD.Setup.t.sol";
 
-contract Mint is YUSDSetup {
+contract Stake is YUSDSetup {
     function _afterSetUp() internal override {
         rusd.mint(address(this), 1, mockData);
     }
@@ -62,7 +62,7 @@ contract Mint is YUSDSetup {
         yusd.stake(address(0), 1, mockData);
     }
 
-    function test_WithData_ShouldEmitEvent() public {
+    function test_ShouldEmitEvent() public {
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), address(this), MINT_AMOUNT);
         vm.expectEmit(true, true, true, true);

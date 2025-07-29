@@ -59,39 +59,39 @@ contract Burn is RUSDSetup {
 
     /* ======== BURN WITH DATA ======== */
 
-    function test_WithData_ShouldDecreaseBalance() public {
+    function test_ShouldDecreaseBalanceWithData() public {
         uint256 balanceBefore = rusd.balanceOf(address(this));
         rusd.burn(MINT_AMOUNT, DATA);
         uint256 balanceAfter = rusd.balanceOf(address(this));
         assertEq(balanceAfter, balanceBefore - MINT_AMOUNT);
     }
 
-    function test_WithData_ShouldDecreaseTotalSupply() public {
+    function test_ShouldDecreaseTotalSupplyWithData() public {
         uint256 totalSupplyBefore = rusd.totalSupply();
         rusd.burn(MINT_AMOUNT, DATA);
         uint256 totalSupplyAfter = rusd.totalSupply();
         assertEq(totalSupplyAfter, totalSupplyBefore - MINT_AMOUNT);
     }
 
-    function test_WithData_RevertIfZeroAmount() public {
+    function test_ShouldRevertIfZeroAmountWithData() public {
         vm.expectRevert(Base.ZeroAmount.selector);
         vm.prank(address(adapter));
         rusd.burn(0, DATA);
     }
 
-    function test_WithData_RevertIfPaused() public {
+    function test_ShouldRevertIfPausedWithData() public {
         rusdDataHub.pause();
         vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
         rusd.burn(MINT_AMOUNT, DATA);
     }
 
-    function test_WithData_RevertIfNotAdmin() public {
+    function test_ShouldRevertIfNotAdminWithData() public {
         vm.prank(user);
         vm.expectRevert(Base.Unauthorized.selector);
         rusd.burn(MINT_AMOUNT, DATA);
     }
 
-    function test_WithData_ShouldEmitEvent() public {
+    function test_ShouldEmitEventWithData() public {
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(this), address(0), MINT_AMOUNT);
         vm.expectEmit(true, true, true, true);

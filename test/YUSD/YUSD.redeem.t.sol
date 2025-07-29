@@ -28,7 +28,7 @@ contract Redeem is YUSDSetup {
         yusd.redeem(address(this), 0, mockData);
     }
 
-    function test_WithData_ShouldEmitEvent() public {
+    function test_ShouldEmitEvent() public {
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(this), address(0), MINT_AMOUNT);
         vm.expectEmit(true, true, true, true);

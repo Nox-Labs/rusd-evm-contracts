@@ -153,9 +153,7 @@ contract CalculateRewardsRound is YUSDSetup {
 
         // 3. Double check by actually trying to claim again.
         rusdBalanceBefore = rusd.balanceOf(attacker);
+        vm.expectRevert(abi.encodeWithSelector(Base.ZeroAmount.selector));
         yusd.claimRewards(currentRoundId, attacker, attacker);
-        assertEq(
-            rusd.balanceOf(attacker), rusdBalanceBefore, "Attacker was able to claim more RUSD"
-        );
     }
 }

@@ -14,11 +14,17 @@ contract ChangeNextRoundBp is YUSDSetup {
         assertEq(nextBp, newBp);
     }
 
-    function test_ShouldEmitRoundAprChanged() public {
+    function test_ShouldEmitEvent() public {
         uint32 newBp = 1000;
 
         vm.expectEmit(true, true, true, true);
         emit IYUSD.RoundBpChanged(currentRoundId + 1, newBp);
         yusd.changeNextRoundBp(newBp);
+    }
+
+    function test_ShouldRevertIfNotAdmin() public {
+        vm.prank(user);
+        vm.expectRevert(Base.Unauthorized.selector);
+        yusd.changeNextRoundBp(1000);
     }
 }

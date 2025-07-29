@@ -25,6 +25,20 @@ contract CompoundRewards is YUSDSetup {
         assertEq(yusdBalanceAfter, yusdBalanceBefore + claimableRewards);
     }
 
+    function test_RevertIfNotMinter() public {
+        vm.expectRevert(Base.Unauthorized.selector);
+        vm.prank(user);
+        yusd.compoundRewards(currentRoundId, address(this));
+    }
+
+    function test_ShouldEmitEvent() public {
+        uint256 rewards = yusd.calculateClaimableRewards(currentRoundId, address(this));
+
+        vm.expectEmit(true, true, true, true);
+        emit IYUSD.RewardsCompounded(currentRoundId, address(this), rewards);
+        yusd.compoundRewards(currentRoundId, address(this));
+    }
+
     function test_RevertIfPaused() public {
         rusdDataHub.pause();
         vm.expectRevert(abi.encodeWithSelector(PausableUpgradeable.EnforcedPause.selector));

@@ -25,20 +25,3 @@ contract RUSDOmnichainAdapterSetup is BaseSetup {
         verifyPackets(uint32(dstEndpoint.eid()), addressToBytes32(address(dstAdapter))); // finish bridge
     }
 }
-// function _stake(EndpointV2Mock dstEndpoint, RUSDOmnichainAdapter dstAdapter, uint256 amount)
-//     internal
-// {
-//     StakePayload memory stakePayload = StakePayload(address(this), amount);
-
-//     LzMessage memory lzMessage = LzMessage(LzMessageType.STAKE, abi.encode(stakePayload));
-
-//     MessagingFee memory fee =
-//         adapter.quoteSend(dstEndpoint.eid(), lzMessage, adapter.defaultLzOptions(), false);
-
-//     adapter.stakePing{value: fee.nativeFee}(
-//         stakePayload,
-//         LzMessageMetadata(dstEndpoint.eid(), adapter.defaultLzOptions(), fee, false)
-//     );
-
-//     verifyPackets(uint32(dstEndpoint.eid()), addressToBytes32(address(dstAdapter))); // finish stake
-// }
