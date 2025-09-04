@@ -61,7 +61,7 @@ library ObservationLib {
     {
         uint256 leftSide = _oldestObservationIndex;
         uint256 rightSide = _newestObservationIndex < leftSide
-            ? leftSide + _cardinality - 1
+            ? _newestObservationIndex + _cardinality
             : _newestObservationIndex;
         uint256 currentIndex;
 
