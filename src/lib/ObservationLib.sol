@@ -59,6 +59,10 @@ library ObservationLib {
             uint16 afterOrAtIndex
         )
     {
+        if (
+            _oldestObservationIndex >= MAX_CARDINALITY || _newestObservationIndex >= MAX_CARDINALITY
+        ) revert IndexOutOfBounds();
+
         uint256 leftSide = _oldestObservationIndex;
         uint256 rightSide = _newestObservationIndex < leftSide
             ? _newestObservationIndex + _cardinality
@@ -114,4 +118,5 @@ library ObservationLib {
     }
 
     error TargetNotFoundInObservations();
+    error IndexOutOfBounds();
 }
