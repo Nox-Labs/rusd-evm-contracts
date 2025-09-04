@@ -21,21 +21,21 @@ library RingBufferLib {
         return _index % _cardinality;
     }
 
-    /**
-     * @notice Computes the negative offset from the given index, wrapped by the cardinality.
-     * @dev  We add `_cardinality` to `_index` to be able to offset even if `_amount` is superior to `_cardinality`.
-     * @param _index The index from which to offset
-     * @param _amount The number of indices to offset.  This is subtracted from the given index.
-     * @param _count The number of elements in the ring buffer
-     * @return Offsetted index.
-     */
-    function offset(uint256 _index, uint256 _amount, uint256 _count)
-        internal
-        pure
-        returns (uint256)
-    {
-        return wrap(_index + _count - _amount, _count);
-    }
+    // /**
+    //  * @notice Computes the negative offset from the given index, wrapped by the cardinality.
+    //  * @dev  We add `_cardinality` to `_index` to be able to offset even if `_amount` is superior to `_cardinality`.
+    //  * @param _index The index from which to offset
+    //  * @param _amount The number of indices to offset.  This is subtracted from the given index.
+    //  * @param _count The number of elements in the ring buffer
+    //  * @return Offsetted index.
+    //  */
+    // function offset(uint256 _index, uint256 _amount, uint256 _count)
+    //     internal
+    //     pure
+    //     returns (uint256)
+    // {
+    //     return wrap(_index + _count - _amount, _count);
+    // }
 
     /// @notice Returns the index of the last recorded TWAB
     /// @param _nextIndex The next available twab index.  This will be recorded to next.
