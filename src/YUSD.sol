@@ -155,8 +155,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         noZeroBytes(data)
     {
         _getRusd().safeTransferFrom(msg.sender, address(this), amount);
-        _transfer(address(0), user, amount);
-
+        _mint(user, amount);
         emit Stake(user, amount, data);
     }
 
@@ -176,7 +175,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         noZeroAddress(user)
         noZeroBytes(data)
     {
-        _transfer(user, address(0), amount);
+        _burn(user, amount);
         _getRusd().safeTransfer(msg.sender, amount);
 
         emit Redeem(user, amount, data);
@@ -237,7 +236,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
     {
         uint256 claimableRewards = calculateClaimableRewards(roundId, user);
         _claimRewards(roundId, user, claimableRewards, address(this));
-        _transfer(address(0), user, uint96(claimableRewards));
+        _mint(user, uint96(claimableRewards));
 
         emit RewardsCompounded(roundId, user, claimableRewards);
     }

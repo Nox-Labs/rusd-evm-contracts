@@ -95,20 +95,36 @@ contract TWAB is Initializable, IERC20, Base {
     /**
      * ============ Internal Functions ============
      */
+
+    /**
+     * @notice Moves `_amount` of tokens from `_from` to `_to`.
+     * @dev This internal function is equivalent to {transfer}, and should be used for ordinary transfers.
+     * It does not handle minting or burning.
+     */
     function _transfer(address _from, address _to, uint96 _amount) internal {
-        if (_from != address(0)) {
-            _decreaseBalances(_from, _amount);
-
-            if (_to == address(0)) _decreaseTotalSupply(_amount);
-        }
-
-        if (_to != address(0)) {
-            _increaseBalances(_to, _amount);
-
-            if (_from == address(0)) _increaseTotalSupply(_amount);
-        }
-
+        _decreaseBalances(_from, _amount);
+        _increaseBalances(_to, _amount);
         emit Transfer(_from, _to, _amount);
+    }
+
+    /**
+     * @notice Creates `_amount` tokens and assigns them to `_to`, increasing the total supply.
+     * @dev This internal function should be used for minting new tokens.
+     */
+    function _mint(address _to, uint96 _amount) internal {
+        _increaseBalances(_to, _amount);
+        _increaseTotalSupply(_amount);
+        emit Transfer(address(0), _to, _amount);
+    }
+
+    /**
+     * @notice Destroys `_amount` tokens from `_from`, reducing the total supply.
+     * @dev This internal function should be used for burning tokens.
+     */
+    function _burn(address _from, uint96 _amount) internal {
+        _decreaseBalances(_from, _amount);
+        _decreaseTotalSupply(_amount);
+        emit Transfer(_from, address(0), _amount);
     }
 
     function _approve(address owner, address spender, uint256 value, bool emitEvent)
