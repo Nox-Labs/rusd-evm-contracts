@@ -74,8 +74,15 @@ library ObservationLib {
             beforeOrAt = _observations[beforeOrAtIndex];
             uint32 beforeOrAtTimestamp = beforeOrAt.timestamp;
 
-            afterOrAtIndex = uint16(RingBufferLib.nextIndex(currentIndex, _cardinality));
-            afterOrAt = _observations[afterOrAtIndex];
+            // Check if we are at the newest observation.
+            // If so, there is no "after" observation, so we treat the newest one as both 'before' and 'after'.
+            if (beforeOrAtIndex == _newestObservationIndex) {
+                afterOrAtIndex = beforeOrAtIndex;
+                afterOrAt = beforeOrAt;
+            } else {
+                afterOrAtIndex = uint16(RingBufferLib.nextIndex(currentIndex, _cardinality));
+                afterOrAt = _observations[afterOrAtIndex];
+            }
 
             bool targetAfterOrAt = beforeOrAtTimestamp <= _target;
 
