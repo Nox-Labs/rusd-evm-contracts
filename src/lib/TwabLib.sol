@@ -87,7 +87,7 @@ library TwabLib {
         )
     {
         accountDetails = _account.details;
-        // record a new observation if the delegateAmount is non-zero and time has not overflowed.
+        // Only record an observation if the current timestamp is within the valid range.
         isObservationRecorded = block.timestamp <= lastObservationAt(periodLength, periodOffset);
 
         accountDetails.balance += _amount;
@@ -134,7 +134,7 @@ library TwabLib {
             revert BalanceLTAmount(accountDetails.balance, _amount, _revertMessage);
         }
 
-        // record a new observation if the delegateAmount is non-zero and time has not overflowed.
+        // Only record an observation if the current timestamp is within the valid range.
         isObservationRecorded = block.timestamp <= lastObservationAt(periodLength, periodOffset);
 
         accountDetails.balance -= _amount;
