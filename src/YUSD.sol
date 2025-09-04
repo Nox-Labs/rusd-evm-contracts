@@ -453,12 +453,12 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
 
         (, uint32 end) = getRoundPeriod(roundId);
 
-        if (round.isFinalized) revert RoundAlreadyFinalized();
-        round.isFinalized = true;
-
         if (block.timestamp < end) revert RoundNotEnded();
 
         if (!hasFinalized(end)) revert TwabNotFinalized();
+
+        if (round.isFinalized) revert RoundAlreadyFinalized();
+        round.isFinalized = true;
 
         uint256 totalRewards = calculateTotalRewardsRound(roundId);
         totalDebt += int256(totalRewards);
