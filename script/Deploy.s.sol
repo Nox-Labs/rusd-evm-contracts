@@ -19,11 +19,12 @@ contract Deploy is Script, FileHelpers, Fork {
     address immutable MINTER;
 
     uint32 immutable PERIOD_LENGTH;
-    uint32 immutable FIRST_ROUND_START_TIMESTAMP;
-    uint32 immutable ROUND_BP;
     uint32 immutable ROUND_DURATION;
+    uint32 immutable ROUND_BP;
 
     uint32 immutable MAIN_CHAIN_ID;
+
+    uint32 FIRST_ROUND_START_TIMESTAMP;
 
     uint256 pk;
 
@@ -35,10 +36,9 @@ contract Deploy is Script, FileHelpers, Fork {
         DEFAULT_ADMIN = vm.addr(pk);
         MINTER = DEFAULT_ADMIN;
 
-        PERIOD_LENGTH = 1 hours;
-        FIRST_ROUND_START_TIMESTAMP = uint32(block.timestamp);
-        ROUND_DURATION = 1 days;
-        ROUND_BP = 200;
+        PERIOD_LENGTH = 1 days;
+        ROUND_DURATION = 5 days;
+        ROUND_BP = 1000;
 
         lzEndpoints[42161] = 0x1a44076050125825900e736c501f859c50fE728c;
         lzEndpoints[56] = 0x1a44076050125825900e736c501f859c50fE728c;
@@ -48,6 +48,10 @@ contract Deploy is Script, FileHelpers, Fork {
 
     function run(uint32 chainId) public {
         fork(chainId);
+
+        FIRST_ROUND_START_TIMESTAMP = uint32(block.timestamp);
+
+        console.log("FIRST_ROUND_START_TIMESTAMP", FIRST_ROUND_START_TIMESTAMP);
 
         address create3Factory = readContractAddress(chainId, "Create3Factory");
         address lzEndpoint = lzEndpoints[chainId];
@@ -117,9 +121,9 @@ contract Deploy is Script, FileHelpers, Fork {
         internal
         returns (address rusdDataHub, address rusd, address yusd, address omnichainAdapter)
     {
-        (rusdDataHub, rusd, omnichainAdapter) =
-            _peripheralChainDeploy(create3Factory, defaultAdmin, minter, lzEndpoint);
-
+        rusdDataHub = create3Factory.deploy_RUSDDataHubMainChain(defaultAdmin, minter);
+        rusd = create3Factory.deploy_RUSD(rusdDataHub);
+        omnichainAdapter = create3Factory.deploy_RUSDOmnichainAdapter(rusdDataHub, lzEndpoint);
         yusd = create3Factory.deploy_YUSD(
             rusdDataHub, PERIOD_LENGTH, FIRST_ROUND_START_TIMESTAMP, ROUND_BP, ROUND_DURATION
         );
