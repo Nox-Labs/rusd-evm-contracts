@@ -31,6 +31,7 @@ interface IYUSD is IERC20Metadata {
     event RoundFinalized(uint32 roundId, uint256 amount);
     event RoundDurationChanged(uint32 roundId, uint32 duration);
     event RoundBpChanged(uint32 roundId, uint32 bp);
+    event MaxRoundRewindReached();
 
     error RoundIdUnavailable();
     error RoundNotEnded();

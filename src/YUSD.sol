@@ -49,6 +49,11 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
     }
 
     /**
+     * @notice The maximum number of rounds to .
+     */
+    uint8 public constant MAX_ROUND_REWIND = 5;
+
+    /**
      * @notice The precision of the basis points.
      * @notice 1% = 100bp.
      * @notice BP stands for Basis Points.
@@ -475,14 +480,25 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
     /**
      * @notice Update the round timestamps.
      * @notice This modifier is used to check if the current round is ended and start the next round.
+     * @notice If the timestamps run so far ahead that the current round after MAX_ROUND_REWIND doesn't reach the actual current round,
+     * the function will emit MaxRoundRewindReached event and stop the function immediately (doesn't reach the _;).
+     * This allow to call any functions that has this modifier several times to reach the actual current round,
+     * and only after that function will reach the _; and continue the execution.
      */
     modifier updateRoundTimestamps() {
         (, uint32 end) = getRoundPeriod(getCurrentRoundId());
+
+        uint8 rewindCount = 0;
 
         while (block.timestamp >= end) {
             _startNextRound();
 
             (, end) = getRoundPeriod(getCurrentRoundId());
+
+            if (++rewindCount == MAX_ROUND_REWIND) {
+                emit MaxRoundRewindReached();
+                return;
+            }
         }
 
         _;
