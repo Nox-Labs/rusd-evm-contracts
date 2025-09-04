@@ -42,9 +42,7 @@ library RingBufferLib {
     /// @param _count The count of the TWAB history.
     /// @return The index of the last recorded TWAB
     function newestIndex(uint256 _nextIndex, uint256 _count) internal pure returns (uint256) {
-        if (_count == 0) {
-            return 0;
-        }
+        if (_count == 0) revert CountCannotBeZero();
 
         return wrap(_nextIndex + _count - 1, _count);
     }
@@ -54,11 +52,9 @@ library RingBufferLib {
         pure
         returns (uint256)
     {
-        if (_count < _cardinality) {
-            return 0;
-        } else {
-            return wrap(_nextIndex + _cardinality, _cardinality);
-        }
+        if (_count == 0) revert CountCannotBeZero();
+        if (_count < _cardinality) return 0;
+        else return wrap(_nextIndex + _cardinality, _cardinality);
     }
 
     /// @notice Computes the ring buffer index that follows the given one, wrapped by cardinality
@@ -76,4 +72,6 @@ library RingBufferLib {
     function prevIndex(uint256 _index, uint256 _cardinality) internal pure returns (uint256) {
         return _index == 0 ? _cardinality - 1 : _index - 1;
     }
+
+    error CountCannotBeZero();
 }
