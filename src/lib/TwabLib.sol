@@ -686,14 +686,9 @@ library TwabLib {
             _accountDetails.cardinality
         );
 
-        // If the afterOrAt is at, we can skip a temporary Observation computation by returning it here
-        if (
-            afterOrAtObservation.timestamp
-                == PeriodOffsetRelativeTimestamp.unwrap(_offsetTargetTime)
-        ) {
-            return afterOrAtObservation;
-        }
-
+        // After the fix in ObservationLib, `prevOrAtObservation` is now guaranteed to be the correct value
+        // (either the exact match or the one immediately preceding the target time).
+        // The previous check for `afterOrAtObservation` is no longer necessary.
         return prevOrAtObservation;
     }
 

@@ -93,7 +93,18 @@ library ObservationLib {
             bool targetAfterOrAt = beforeOrAtTimestamp <= _target;
 
             // Check if we've found the corresponding Observation.
-            if (targetAfterOrAt && _target <= afterOrAt.timestamp) break;
+            if (targetAfterOrAt && _target <= afterOrAt.timestamp) {
+                // If either observation is an exact match, collapse the interval to that point
+                // to make the function's behavior unambiguous.
+                if (afterOrAt.timestamp == _target) {
+                    beforeOrAt = afterOrAt;
+                    beforeOrAtIndex = afterOrAtIndex;
+                } else if (beforeOrAtTimestamp == _target) {
+                    afterOrAt = beforeOrAt;
+                    afterOrAtIndex = beforeOrAtIndex;
+                }
+                break;
+            }
 
             // If `beforeOrAtTimestamp` is greater than `_target`, then we keep searching lower. To the left of the current index.
             if (!targetAfterOrAt) rightSide = currentIndex - 1;
