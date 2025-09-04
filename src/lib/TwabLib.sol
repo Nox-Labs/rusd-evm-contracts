@@ -41,13 +41,13 @@ library TwabLib {
      * @notice Struct ring buffer parameters for single user Account.
      * @param balance Current token balance for an Account
      * @param nextObservationIndex Next uninitialized or updatable ring buffer checkpoint storage slot
-     * @param cardinality Current total "initialized" ring buffer checkpoints for single user Account.
+     * @param bufferCount Current total "initialized" ring buffer checkpoints for single user Account.
      *                    Used to set initial boundary conditions for an efficient binary search.
      */
     struct AccountDetails {
         uint96 balance;
         uint16 nextObservationIndex;
-        uint16 cardinality;
+        uint16 bufferCount;
     }
 
     /**
@@ -160,7 +160,7 @@ library TwabLib {
         AccountDetails memory _accountDetails
     ) internal view returns (uint16 index, ObservationLib.Observation memory observation) {
         // If the circular buffer has not been fully populated, we go to the beginning of the buffer at index 0.
-        if (_accountDetails.cardinality < MAX_CARDINALITY) {
+        if (_accountDetails.bufferCount < MAX_CARDINALITY) {
             index = 0;
             observation = _observations[0];
         } else {
@@ -437,13 +437,13 @@ library TwabLib {
             _accountDetails.nextObservationIndex =
                 uint16(RingBufferLib.nextIndex(uint256(nextIndex), MAX_CARDINALITY));
 
-            // Prevent the Account specific cardinality from exceeding the MAX_CARDINALITY.
-            // The ring buffer length is limited by MAX_CARDINALITY. IF the account.cardinality
-            // exceeds the max cardinality, new observations would be incorrectly set or the
+            // Prevent the Account specific bufferCount from exceeding the MAX_CARDINALITY.
+            // The ring buffer length is limited by MAX_CARDINALITY. IF the account.bufferCount
+            // exceeds the max bufferCount, new observations would be incorrectly set or the
             // observation would be out of "bounds" of the ring buffer. Once reached the
-            // Account.cardinality will continue to be equal to max cardinality.
-            _accountDetails.cardinality = _accountDetails.cardinality < MAX_CARDINALITY
-                ? _accountDetails.cardinality + 1
+            // Account.bufferCount will continue to be equal to max bufferCount.
+            _accountDetails.bufferCount = _accountDetails.bufferCount < MAX_CARDINALITY
+                ? _accountDetails.bufferCount + 1
                 : MAX_CARDINALITY;
         }
 
@@ -507,7 +507,7 @@ library TwabLib {
         );
 
         // Create a new Observation if it's the first period or the current time falls within a new period
-        if (_accountDetails.cardinality == 0 || currentPeriod > newestObservationPeriod) {
+        if (_accountDetails.bufferCount == 0 || currentPeriod > newestObservationPeriod) {
             return (_accountDetails.nextObservationIndex, newestObservation, true);
         }
 
@@ -627,7 +627,7 @@ library TwabLib {
         PeriodOffsetRelativeTimestamp _offsetTargetTime
     ) private view returns (ObservationLib.Observation memory prevOrAtObservation) {
         // If there are no observations, return a zeroed observation
-        if (_accountDetails.cardinality == 0) {
+        if (_accountDetails.bufferCount == 0) {
             return ObservationLib.Observation({cumulativeBalance: 0, balance: 0, timestamp: 0});
         }
 
@@ -640,7 +640,7 @@ library TwabLib {
         if (PeriodOffsetRelativeTimestamp.unwrap(_offsetTargetTime) < prevOrAtObservation.timestamp)
         {
             // if the user didn't have any activity prior to the oldest observation, then we know they had a zero balance
-            if (_accountDetails.cardinality < MAX_CARDINALITY) {
+            if (_accountDetails.bufferCount < MAX_CARDINALITY) {
                 return ObservationLib.Observation({
                     cumulativeBalance: 0,
                     balance: 0,
@@ -656,7 +656,7 @@ library TwabLib {
         }
 
         // We know targetTime >= oldestObservation.timestamp because of the above if statement, so we can return here.
-        if (_accountDetails.cardinality == 1) {
+        if (_accountDetails.bufferCount == 1) {
             return prevOrAtObservation;
         }
 
@@ -672,7 +672,7 @@ library TwabLib {
             return afterOrAtObservation;
         }
         // if we know there is only 1 observation older than the newest
-        if (_accountDetails.cardinality == 2) {
+        if (_accountDetails.bufferCount == 2) {
             return prevOrAtObservation;
         }
 
@@ -683,7 +683,7 @@ library TwabLib {
             newestTwabIndex,
             oldestTwabIndex,
             PeriodOffsetRelativeTimestamp.unwrap(_offsetTargetTime),
-            _accountDetails.cardinality
+            _accountDetails.bufferCount
         );
 
         // After the fix in ObservationLib, `prevOrAtObservation` is now guaranteed to be the correct value
