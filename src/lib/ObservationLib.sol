@@ -66,6 +66,12 @@ library ObservationLib {
         uint256 currentIndex;
 
         while (true) {
+            // If the search pointers have crossed, it means the target is not within the range.
+            // This prevents an infinite loop.
+            // This case should ideally not be reached if the calling contract performs checks,
+            // but as a safety measure, we revert to prevent a gas-consuming infinite loop.
+            if (leftSide > rightSide) revert TargetNotFoundInObservations();
+
             // We start our search in the middle of the `leftSide` and `rightSide`.
             // After each iteration, we narrow down the search to the left or the right side while still starting our search in the middle.
             currentIndex = (leftSide + rightSide) / 2;
@@ -87,17 +93,14 @@ library ObservationLib {
             bool targetAfterOrAt = beforeOrAtTimestamp <= _target;
 
             // Check if we've found the corresponding Observation.
-            if (targetAfterOrAt && _target <= afterOrAt.timestamp) {
-                break;
-            }
+            if (targetAfterOrAt && _target <= afterOrAt.timestamp) break;
 
             // If `beforeOrAtTimestamp` is greater than `_target`, then we keep searching lower. To the left of the current index.
-            if (!targetAfterOrAt) {
-                rightSide = currentIndex - 1;
-            } else {
-                // Otherwise, we keep searching higher. To the right of the current index.
-                leftSide = currentIndex + 1;
-            }
+            if (!targetAfterOrAt) rightSide = currentIndex - 1;
+            // Otherwise, we keep searching higher. To the right of the current index.
+            else leftSide = currentIndex + 1;
         }
     }
+
+    error TargetNotFoundInObservations();
 }
