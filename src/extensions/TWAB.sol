@@ -238,9 +238,9 @@ contract TWAB is Initializable, IERC20, Base {
      * @notice Computes the timestamp after which no more observations will be made.
      * @return The largest timestamp at which the TwabController can record a new observation.
      */
-    function lastObservationAt() external view returns (uint256) {
+    function maxRecordableTimestamp() external view returns (uint256) {
         TWABStorage storage $ = _getTWABStorage();
-        return TwabLib.lastObservationAt($.periodLength, $.periodOffset);
+        return TwabLib.maxRecordableTimestamp($.periodLength, $.periodOffset);
     }
 
     /**

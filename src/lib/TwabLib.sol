@@ -88,7 +88,8 @@ library TwabLib {
     {
         accountDetails = _account.details;
         // Only record an observation if the current timestamp is within the valid range.
-        isObservationRecorded = block.timestamp <= lastObservationAt(periodLength, periodOffset);
+        isObservationRecorded =
+            block.timestamp <= maxRecordableTimestamp(periodLength, periodOffset);
 
         accountDetails.balance += _amount;
 
@@ -135,7 +136,8 @@ library TwabLib {
         }
 
         // Only record an observation if the current timestamp is within the valid range.
-        isObservationRecorded = block.timestamp <= lastObservationAt(periodLength, periodOffset);
+        isObservationRecorded =
+            block.timestamp <= maxRecordableTimestamp(periodLength, periodOffset);
 
         accountDetails.balance -= _amount;
 
@@ -229,7 +231,7 @@ library TwabLib {
         pure
         returns (bool)
     {
-        return timestamp > lastObservationAt(periodLength, periodOffset);
+        return timestamp > maxRecordableTimestamp(periodLength, periodOffset);
     }
 
     /**
@@ -237,7 +239,7 @@ library TwabLib {
      * @param periodOffset The offset of the first period
      * @return The largest timestamp at which the TwabController can record a new observation.
      */
-    function lastObservationAt(uint32 periodLength, uint32 periodOffset)
+    function maxRecordableTimestamp(uint32 periodLength, uint32 periodOffset)
         internal
         pure
         returns (uint256)
