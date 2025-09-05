@@ -18,24 +18,27 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
 import "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 
+import "@layerzerolabs/create3-factory/contracts/ICREATE3Factory.sol";
+
 import "test/_utils/LayerZeroDevtoolsHelper.sol";
 
 contract BaseSetup is LayerZeroDevtoolsHelper {
-    using RusdDeployer for address;
+    using RusdDeployer for ICREATE3Factory;
+    using Create3Deployer for ICREATE3Factory;
 
     uint96 public constant MINT_AMOUNT = 1e6;
     uint32 public constant ROUND_BP = 1e4;
 
     bytes public constant mockData = "mock";
 
-    address public create3Factory;
+    ICREATE3Factory public create3Factory;
 
     RUSD public rusd;
     YUSD public yusd;
     RUSDDataHubMainChain public rusdDataHub;
     RUSDOmnichainAdapter public adapter;
 
-    address public create3Factory2;
+    ICREATE3Factory public create3Factory2;
 
     RUSD public rusd2;
     RUSDDataHub public rusdDataHub2;
@@ -54,20 +57,18 @@ contract BaseSetup is LayerZeroDevtoolsHelper {
     }
 
     function _setUp() internal virtual {
-        create3Factory = Create3Deployer._deploy_create3Factory("RUSD.CREATE3Factory");
-        create3Factory2 = Create3Deployer._deploy_create3Factory("RUSD.CREATE3Factory2");
+        create3Factory = Create3Deployer.deploy_create3Factory("RUSD.CREATE3Factory");
+        create3Factory2 = Create3Deployer.deploy_create3Factory("RUSD.CREATE3Factory2");
 
-        rusdDataHub = RUSDDataHubMainChain(
-            create3Factory.deploy_RUSDDataHubMainChain(address(this), address(this))
-        );
-        rusd = RUSD(create3Factory.deploy_RUSD(address(rusdDataHub)));
+        rusdDataHub = create3Factory.deploy_RUSDDataHubMainChain(address(this), address(this));
+        rusd = RUSD(create3Factory.deploy_RUSD(rusdDataHub));
         yusd = YUSD(
             create3Factory.deploy_YUSD(
-                address(rusdDataHub), twabPeriodLength, uint32(block.timestamp), ROUND_BP, 100 days
+                rusdDataHub, twabPeriodLength, uint32(block.timestamp), ROUND_BP, 100 days
             )
         );
         adapter = RUSDOmnichainAdapter(
-            create3Factory.deploy_RUSDOmnichainAdapter(address(rusdDataHub), address(endPointA))
+            create3Factory.deploy_RUSDOmnichainAdapter(rusdDataHub, address(endPointA))
         );
 
         rusdDataHub.setRUSD(address(rusd));
@@ -75,9 +76,9 @@ contract BaseSetup is LayerZeroDevtoolsHelper {
         rusdDataHub.setOmnichainAdapter(address(adapter));
 
         rusdDataHub2 = RUSDDataHub(create3Factory2.deploy_RUSDDataHub(address(this), address(this)));
-        rusd2 = RUSD(create3Factory2.deploy_RUSD(address(rusdDataHub2)));
+        rusd2 = RUSD(create3Factory2.deploy_RUSD(rusdDataHub2));
         adapter2 = RUSDOmnichainAdapter(
-            create3Factory2.deploy_RUSDOmnichainAdapter(address(rusdDataHub2), address(endPointB))
+            create3Factory2.deploy_RUSDOmnichainAdapter(rusdDataHub2, address(endPointB))
         );
 
         rusdDataHub2.setRUSD(address(rusd2));

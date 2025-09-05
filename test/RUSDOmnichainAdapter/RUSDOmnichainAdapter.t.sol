@@ -32,7 +32,7 @@ contract RUSDOmnichainAdapterTest is RUSDOmnichainAdapterSetup {
 
     function test_initialize_RevertIfAlreadyInitialized() public {
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
-        adapter.initialize(address(rusdDataHub));
+        adapter.initialize(rusdDataHub);
     }
 
     /* ======== endpoint ======== */

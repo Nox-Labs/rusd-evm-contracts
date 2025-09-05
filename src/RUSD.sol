@@ -39,7 +39,7 @@ contract RUSD is
      * @notice Initializes the contract.
      * @param _rusdDataHub The address of the RUSDDataHub contract.
      */
-    function initialize(address _rusdDataHub) public initializer {
+    function initialize(IRUSDDataHub _rusdDataHub) public initializer {
         __RUSDDataHubKeeper_init(_rusdDataHub);
         __ERC20_init("RUSD", "RUSD");
         __ERC20Permit_init(name());

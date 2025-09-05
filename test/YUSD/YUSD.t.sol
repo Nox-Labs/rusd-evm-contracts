@@ -31,7 +31,7 @@ contract YUSDTest is YUSDSetup {
 
     function test_initialize_RevertIfAlreadyInitialized() public {
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
-        yusd.initialize(address(this), 1, 1, 1, 1);
+        yusd.initialize(rusdDataHub, 1, 1, 1, 1);
     }
 
     /* ======== getCurrentRoundId ======== */

@@ -17,12 +17,12 @@ abstract contract RUSDDataHubKeeper is Initializable, Base {
     bytes32 private constant RUSD_DATA_HUB_KEEPER_STORAGE_LOCATION =
         0xf6c75126fb149fdabc8197aad315689d01deaa3ab6f9a0ac6e9d265d1ad6fe00;
 
-    function __RUSDDataHubKeeper_init(address _rusdDataHub)
+    function __RUSDDataHubKeeper_init(IRUSDDataHub _rusdDataHub)
         internal
-        noZeroAddress(_rusdDataHub)
+        noZeroAddress(address(_rusdDataHub))
         onlyInitializing
     {
-        _getRUSDDataHubKeeperStorage().rusdDataHub = IRUSDDataHub(_rusdDataHub);
+        _getRUSDDataHubKeeperStorage().rusdDataHub = _rusdDataHub;
     }
 
     function _getRUSDDataHubKeeperStorage()

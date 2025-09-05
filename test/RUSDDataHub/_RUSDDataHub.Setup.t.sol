@@ -9,7 +9,8 @@ contract RUSDDataHubSetup is BaseSetup {
     address mockAddress = makeAddr("mockAddress");
 
     function _afterSetUp() internal override {
-        address _create3Factory = Create3Deployer._deploy_create3Factory("RUSD.CREATE3Factory.2");
+        ICREATE3Factory _create3Factory =
+            Create3Deployer.deploy_create3Factory("RUSD.CREATE3Factory.2");
         newRUSDDataHub = RUSDDataHubMainChain(
             RusdDeployer.deploy_RUSDDataHubMainChain(_create3Factory, address(this), address(this))
         );

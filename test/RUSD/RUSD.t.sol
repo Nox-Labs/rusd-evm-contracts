@@ -89,7 +89,7 @@ contract RUSDTest is RUSDSetup {
 
     function test_initialize_RevertIfAlreadyInitialized() public {
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
-        rusd.initialize(address(this));
+        rusd.initialize(rusdDataHub);
     }
 
     /* ======== decimals ======== */

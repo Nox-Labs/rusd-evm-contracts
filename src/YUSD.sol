@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {IYUSD} from "./interface/IYUSD.sol";
 import {IRUSD} from "./interface/IRUSD.sol";
-import {PauseLevel} from "./interface/IRUSDDataHub.sol";
+import {IRUSDDataHub, PauseLevel} from "./interface/IRUSDDataHub.sol";
 
 import {TWAB} from "./extensions/TWAB.sol";
 import {RUSDDataHubKeeper} from "./extensions/RUSDDataHubKeeper.sol";
@@ -96,7 +96,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
      * @param _roundDuration The duration of the first round. (How long the first round lasts?)
      */
     function initialize(
-        address _rusdDataHub,
+        IRUSDDataHub _rusdDataHub,
         uint32 _periodLength,
         uint32 _firstRoundStartTimestamp,
         uint32 _roundBp,

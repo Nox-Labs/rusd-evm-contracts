@@ -1,93 +1,120 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.20;
 
-import {RUSD} from "../../src/RUSD.sol";
-import {YUSD} from "../../src/YUSD.sol";
-import {RUSDDataHubMainChain, RUSDDataHub} from "../../src/RUSDDataHub.sol";
-import {RUSDOmnichainAdapter} from "../../src/RUSDOmnichainAdapter.sol";
+import {RUSD, IRUSD} from "../../src/RUSD.sol";
+import {YUSD, IYUSD} from "../../src/YUSD.sol";
+import {
+    RUSDDataHubMainChain,
+    RUSDDataHub,
+    IRUSDDataHubMainChain,
+    IRUSDDataHub
+} from "../../src/RUSDDataHub.sol";
+import {RUSDOmnichainAdapter, IRUSDOmnichainAdapter} from "../../src/RUSDOmnichainAdapter.sol";
 
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-
 import {Create3Deployer} from "./Create3Deployer.sol";
 
-library RusdDeployer {
-    using Create3Deployer for address;
+import {ICREATE3Factory} from "@layerzerolabs/create3-factory/contracts/ICREATE3Factory.sol";
 
-    function deploy_RUSDDataHub(address factory, address defaultAdmin, address minter)
+library RusdDeployer {
+    using Create3Deployer for ICREATE3Factory;
+
+    function deploy_RUSDDataHub(ICREATE3Factory factory, address defaultAdmin, address minter)
         internal
-        returns (address rusdDataHub)
+        returns (RUSDDataHub rusdDataHub)
     {
         address implementation = address(new RUSDDataHub());
 
-        rusdDataHub = factory.create3Deploy(
-            type(ERC1967Proxy).creationCode,
-            abi.encode(
-                implementation, abi.encodeCall(RUSDDataHub.initialize, (defaultAdmin, minter))
-            ),
-            "RUSDDataHub"
+        rusdDataHub = RUSDDataHub(
+            factory.create3Deploy(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(
+                    implementation, abi.encodeCall(RUSDDataHub.initialize, (defaultAdmin, minter))
+                ),
+                "RUSDDataHub"
+            )
         );
     }
 
-    function deploy_RUSDDataHubMainChain(address factory, address defaultAdmin, address minter)
-        internal
-        returns (address rusdDataHub)
-    {
+    function deploy_RUSDDataHubMainChain(
+        ICREATE3Factory factory,
+        address defaultAdmin,
+        address minter
+    ) internal returns (RUSDDataHubMainChain rusdDataHub) {
         address implementation = address(new RUSDDataHubMainChain());
 
-        rusdDataHub = factory.create3Deploy(
-            type(ERC1967Proxy).creationCode,
-            abi.encode(
-                implementation, abi.encodeCall(RUSDDataHub.initialize, (defaultAdmin, minter))
-            ),
-            "RUSDDataHubMainChain"
+        rusdDataHub = RUSDDataHubMainChain(
+            factory.create3Deploy(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(
+                    implementation, abi.encodeCall(RUSDDataHub.initialize, (defaultAdmin, minter))
+                ),
+                "RUSDDataHubMainChain"
+            )
         );
     }
 
-    function deploy_RUSD(address factory, address rusdDataHub) internal returns (address rusd) {
+    function deploy_RUSD(ICREATE3Factory factory, IRUSDDataHub rusdDataHub)
+        internal
+        returns (RUSD rusd)
+    {
         address implementation = address(new RUSD());
 
-        rusd = factory.create3Deploy(
-            type(ERC1967Proxy).creationCode,
-            abi.encode(implementation, abi.encodeCall(RUSD.initialize, (rusdDataHub))),
-            "RUSD"
+        rusd = RUSD(
+            factory.create3Deploy(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(implementation, abi.encodeCall(RUSD.initialize, (rusdDataHub))),
+                "RUSD"
+            )
         );
     }
 
     function deploy_YUSD(
-        address factory,
-        address rusdDataHub,
+        ICREATE3Factory factory,
+        IRUSDDataHub rusdDataHub,
         uint32 periodLength,
         uint32 firstRoundStartTimestamp,
         uint32 roundBp,
         uint32 roundDuration
-    ) internal returns (address yusd) {
+    ) internal returns (YUSD yusd) {
         address implementation = address(new YUSD());
 
-        yusd = factory.create3Deploy(
-            type(ERC1967Proxy).creationCode,
-            abi.encode(
-                implementation,
-                abi.encodeCall(
-                    YUSD.initialize,
-                    (rusdDataHub, periodLength, firstRoundStartTimestamp, roundBp, roundDuration)
-                )
-            ),
-            "YUSD"
+        yusd = YUSD(
+            factory.create3Deploy(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(
+                    implementation,
+                    abi.encodeCall(
+                        YUSD.initialize,
+                        (
+                            rusdDataHub,
+                            periodLength,
+                            firstRoundStartTimestamp,
+                            roundBp,
+                            roundDuration
+                        )
+                    )
+                ),
+                "YUSD"
+            )
         );
     }
 
-    function deploy_RUSDOmnichainAdapter(address factory, address rusdDataHub, address lzEndpoint)
-        internal
-        returns (address omnichainAdapter)
-    {
+    function deploy_RUSDOmnichainAdapter(
+        ICREATE3Factory factory,
+        IRUSDDataHub rusdDataHub,
+        address lzEndpoint
+    ) internal returns (RUSDOmnichainAdapter omnichainAdapter) {
         address implementation = address(new RUSDOmnichainAdapter(lzEndpoint));
 
-        omnichainAdapter = factory.create3Deploy(
-            type(ERC1967Proxy).creationCode,
-            abi.encode(
-                implementation, abi.encodeCall(RUSDOmnichainAdapter.initialize, (rusdDataHub))
-            ),
-            "RUSDOmnichainAdapter"
+        omnichainAdapter = RUSDOmnichainAdapter(
+            factory.create3Deploy(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(
+                    implementation, abi.encodeCall(RUSDOmnichainAdapter.initialize, (rusdDataHub))
+                ),
+                "RUSDOmnichainAdapter"
+            )
         );
     }
 }

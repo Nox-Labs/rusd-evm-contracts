@@ -11,7 +11,7 @@ import {addressToBytes32} from "../test/_utils/LayerZeroDevtoolsHelper.sol";
 import "./lib/RusdDeployer.sol";
 
 contract Deploy is Script, FileHelpers, Fork {
-    using RusdDeployer for address;
+    using RusdDeployer for ICREATE3Factory;
 
     mapping(uint256 chainId => address lzEndpoint) public lzEndpoints;
 
@@ -53,13 +53,14 @@ contract Deploy is Script, FileHelpers, Fork {
 
         console.log("FIRST_ROUND_START_TIMESTAMP", FIRST_ROUND_START_TIMESTAMP);
 
-        address create3Factory = readContractAddress(chainId, "Create3Factory");
+        ICREATE3Factory create3Factory =
+            ICREATE3Factory(readContractAddress(chainId, "Create3Factory"));
         address lzEndpoint = lzEndpoints[chainId];
 
-        address rusdDataHub;
-        address rusd;
-        address yusd;
-        address omnichainAdapter;
+        IRUSDDataHub rusdDataHub;
+        IRUSD rusd;
+        IYUSD yusd;
+        IRUSDOmnichainAdapter omnichainAdapter;
 
         vm.startBroadcast(pk);
 
@@ -71,16 +72,18 @@ contract Deploy is Script, FileHelpers, Fork {
                 _peripheralChainDeploy(create3Factory, DEFAULT_ADMIN, MINTER, lzEndpoint);
         }
 
-        RUSDDataHub(rusdDataHub).setRUSD(address(rusd));
-        RUSDDataHub(rusdDataHub).setOmnichainAdapter(address(omnichainAdapter));
-        if (chainId == MAIN_CHAIN_ID) RUSDDataHubMainChain(rusdDataHub).setYUSD(address(yusd));
+        rusdDataHub.setRUSD(address(rusd));
+        rusdDataHub.setOmnichainAdapter(address(omnichainAdapter));
+        if (chainId == MAIN_CHAIN_ID) {
+            IRUSDDataHubMainChain(address(rusdDataHub)).setYUSD(address(yusd));
+        }
 
         vm.stopBroadcast();
 
-        writeContractAddress(chainId, rusd, "RUSD");
-        writeContractAddress(chainId, rusdDataHub, "RUSDDataHub");
-        writeContractAddress(chainId, omnichainAdapter, "RUSDOmnichainAdapter");
-        if (chainId == MAIN_CHAIN_ID) writeContractAddress(chainId, yusd, "YUSD");
+        writeContractAddress(chainId, address(rusd), "RUSD");
+        writeContractAddress(chainId, address(rusdDataHub), "RUSDDataHub");
+        writeContractAddress(chainId, address(omnichainAdapter), "RUSDOmnichainAdapter");
+        if (chainId == MAIN_CHAIN_ID) writeContractAddress(chainId, address(yusd), "YUSD");
 
         _afterDeploy();
     }
@@ -102,24 +105,32 @@ contract Deploy is Script, FileHelpers, Fork {
     function _afterDeploy() internal virtual {}
 
     function _peripheralChainDeploy(
-        address create3Factory,
+        ICREATE3Factory create3Factory,
         address defaultAdmin,
         address minter,
         address lzEndpoint
-    ) internal returns (address rusdDataHub, address rusd, address omnichainAdapter) {
+    )
+        internal
+        returns (IRUSDDataHub rusdDataHub, IRUSD rusd, IRUSDOmnichainAdapter omnichainAdapter)
+    {
         rusdDataHub = create3Factory.deploy_RUSDDataHubMainChain(defaultAdmin, minter);
         rusd = create3Factory.deploy_RUSD(rusdDataHub);
         omnichainAdapter = create3Factory.deploy_RUSDOmnichainAdapter(rusdDataHub, lzEndpoint);
     }
 
     function _mainChainDeploy(
-        address create3Factory,
+        ICREATE3Factory create3Factory,
         address defaultAdmin,
         address minter,
         address lzEndpoint
     )
         internal
-        returns (address rusdDataHub, address rusd, address yusd, address omnichainAdapter)
+        returns (
+            IRUSDDataHub rusdDataHub,
+            IRUSD rusd,
+            IYUSD yusd,
+            IRUSDOmnichainAdapter omnichainAdapter
+        )
     {
         rusdDataHub = create3Factory.deploy_RUSDDataHubMainChain(defaultAdmin, minter);
         rusd = create3Factory.deploy_RUSD(rusdDataHub);
