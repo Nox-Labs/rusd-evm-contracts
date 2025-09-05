@@ -42,12 +42,16 @@ abstract contract Blacklistable is Initializable {
     }
 
     function _blacklist(address account) internal virtual {
-        _getBlacklistableStorage().list[account] = true;
+        BlacklistableStorage storage $ = _getBlacklistableStorage();
+        if ($.list[account]) revert AccountAlreadyBlacklisted(account);
+        $.list[account] = true;
         emit Blacklisted(account);
     }
 
     function _unBlacklist(address account) internal virtual {
-        _getBlacklistableStorage().list[account] = false;
+        BlacklistableStorage storage $ = _getBlacklistableStorage();
+        if (!$.list[account]) revert AccountNotBlacklisted(account);
+        $.list[account] = false;
         emit UnBlacklisted(account);
     }
 
@@ -73,4 +77,7 @@ abstract contract Blacklistable is Initializable {
     /* ======== ERRORS ======== */
 
     error Blacklist(address account);
+
+    error AccountAlreadyBlacklisted(address account);
+    error AccountNotBlacklisted(address account);
 }
