@@ -59,7 +59,7 @@ library TwabLib {
      */
     struct Account {
         AccountDetails details;
-        ObservationLib.Observation[17520] observations;
+        ObservationLib.Observation[MAX_CARDINALITY] observations;
     }
 
     /**
