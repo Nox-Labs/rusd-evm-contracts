@@ -5,38 +5,39 @@ import {RingBufferLib} from "./RingBufferLib.sol";
 
 import {ObservationLib, MAX_CARDINALITY} from "./ObservationLib.sol";
 
-type PeriodOffsetRelativeTimestamp is uint32;
-
-/// @notice Emitted when a balance is decreased by an amount that exceeds the amount available.
-/// @param balance The current balance of the account
-/// @param amount The amount being decreased from the account's balance
-/// @param message An additional message describing the error
-error BalanceLTAmount(uint96 balance, uint96 amount, string message);
-
-/// @notice Emitted when a delegate balance is decreased by an amount that exceeds the amount available.
-/// @param delegateBalance The current delegate balance of the account
-/// @param delegateAmount The amount being decreased from the account's delegate balance
-/// @param message An additional message describing the error
-error DelegateBalanceLTAmount(uint96 delegateBalance, uint96 delegateAmount, string message);
-
-/// @notice Emitted when a request is made for a twab that is not yet finalized.
-/// @param timestamp The requested timestamp
-/// @param currentOverwritePeriodStartedAt The current overwrite period start time
-error TimestampNotFinalized(uint256 timestamp, uint256 currentOverwritePeriodStartedAt);
-
-/// @notice Emitted when a TWAB time range start is after the end.
-/// @param start The start time
-/// @param end The end time
-error InvalidTimeRange(uint256 start, uint256 end);
-
-/// @notice Emitted when there is insufficient history to lookup a twab time range
-/// @param requestedTimestamp The timestamp requested
-/// @param oldestTimestamp The oldest timestamp that can be read
-error InsufficientHistory(
-    PeriodOffsetRelativeTimestamp requestedTimestamp, PeriodOffsetRelativeTimestamp oldestTimestamp
-);
-
 library TwabLib {
+    type PeriodOffsetRelativeTimestamp is uint32;
+
+    /// @notice Emitted when a balance is decreased by an amount that exceeds the amount available.
+    /// @param balance The current balance of the account
+    /// @param amount The amount being decreased from the account's balance
+    /// @param message An additional message describing the error
+    error BalanceLTAmount(uint96 balance, uint96 amount, string message);
+
+    /// @notice Emitted when a delegate balance is decreased by an amount that exceeds the amount available.
+    /// @param delegateBalance The current delegate balance of the account
+    /// @param delegateAmount The amount being decreased from the account's delegate balance
+    /// @param message An additional message describing the error
+    error DelegateBalanceLTAmount(uint96 delegateBalance, uint96 delegateAmount, string message);
+
+    /// @notice Emitted when a request is made for a twab that is not yet finalized.
+    /// @param timestamp The requested timestamp
+    /// @param currentOverwritePeriodStartedAt The current overwrite period start time
+    error TimestampNotFinalized(uint256 timestamp, uint256 currentOverwritePeriodStartedAt);
+
+    /// @notice Emitted when a TWAB time range start is after the end.
+    /// @param start The start time
+    /// @param end The end time
+    error InvalidTimeRange(uint256 start, uint256 end);
+
+    /// @notice Emitted when there is insufficient history to lookup a twab time range
+    /// @param requestedTimestamp The timestamp requested
+    /// @param oldestTimestamp The oldest timestamp that can be read
+    error InsufficientHistory(
+        PeriodOffsetRelativeTimestamp requestedTimestamp,
+        PeriodOffsetRelativeTimestamp oldestTimestamp
+    );
+
     /**
      * @notice Struct ring buffer parameters for single user Account.
      * @param balance Current token balance for an Account
