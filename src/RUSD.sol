@@ -211,7 +211,7 @@ contract RUSD is
      * @notice Revert if data is empty or contains the CROSS_CHAIN constant.
      */
     modifier noCrossChain(bytes calldata data) {
-        if (bytes32(data) == CROSS_CHAIN) revert CrossChainActionNotAllowed();
+        if (data.length == 32 && bytes32(data) == CROSS_CHAIN) revert CrossChainActionNotAllowed();
         _;
     }
 }
