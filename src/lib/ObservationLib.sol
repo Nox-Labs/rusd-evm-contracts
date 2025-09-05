@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import {RingBufferLib} from "./RingBufferLib.sol";
 
 /**
- * @dev Sets max ring buffer length in the Account.observations Observation list.
+ * @dev Sets max ring buffer cardinality in the Account.observations Observation list.
  *         As users transfer/mint/burn tickets new Observation checkpoints are recorded.
  *         The current `MAX_CARDINALITY` guarantees a one year minimum, of accurate historical lookups.
  * @dev The user Account.Account.cardinality parameter can NOT exceed the max cardinality variable.
