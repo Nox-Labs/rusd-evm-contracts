@@ -54,7 +54,7 @@ library RingBufferLib {
     {
         if (_count == 0) revert CountCannotBeZero();
         if (_count < _cardinality) return 0;
-        else return wrap(_nextIndex + _cardinality, _cardinality);
+        else return _nextIndex;
     }
 
     /// @notice Computes the ring buffer index that follows the given one, wrapped by cardinality
