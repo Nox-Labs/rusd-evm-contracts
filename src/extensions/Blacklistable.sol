@@ -10,12 +10,12 @@ abstract contract Blacklistable is Initializable {
     }
 
     // keccak256(abi.encode(uint256(keccak256("rusd.storage.blacklistable")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant BlacklistableStorageLocation =
+    bytes32 private constant BLACKLISTABLE_STORAGE_LOCATION =
         0x8a2131119662f7e94b7ab89e3d23f8f5cb94fee44e6233ad76f409857f71e400;
 
     function _getBlacklistableStorage() private pure returns (BlacklistableStorage storage $) {
         assembly {
-            $.slot := BlacklistableStorageLocation
+            $.slot := BLACKLISTABLE_STORAGE_LOCATION
         }
     }
 

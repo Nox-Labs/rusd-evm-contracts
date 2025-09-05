@@ -29,12 +29,12 @@ contract TWAB is Initializable, IERC20, Base {
     }
 
     // keccak256(abi.encode(uint256(keccak256("twab.storage.TWAB")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant TWABStorageLocation =
+    bytes32 private constant TWAB_STORAGE_LOCATION =
         0xd5efd9e6f6b587af2e2d822068ce7fcce37c6c1290968041377a1bfb7c5a0900;
 
     function _getTWABStorage() private pure returns (TWABStorage storage $) {
         assembly {
-            $.slot := TWABStorageLocation
+            $.slot := TWAB_STORAGE_LOCATION
         }
     }
     /**

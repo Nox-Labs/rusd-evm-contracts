@@ -14,7 +14,7 @@ abstract contract RUSDDataHubKeeper is Initializable, Base {
     }
 
     // keccak256(abi.encode(uint256(keccak256("rusd.storage.RUSDDataHubKeeper")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant RUSDDataHubKeeperStorageLocation =
+    bytes32 private constant RUSD_DATA_HUB_KEEPER_STORAGE_LOCATION =
         0xf6c75126fb149fdabc8197aad315689d01deaa3ab6f9a0ac6e9d265d1ad6fe00;
 
     function __RUSDDataHubKeeper_init(address _rusdDataHub)
@@ -31,7 +31,7 @@ abstract contract RUSDDataHubKeeper is Initializable, Base {
         returns (RUSDDataHubKeeperStorage storage $)
     {
         assembly {
-            $.slot := RUSDDataHubKeeperStorageLocation
+            $.slot := RUSD_DATA_HUB_KEEPER_STORAGE_LOCATION
         }
     }
 
