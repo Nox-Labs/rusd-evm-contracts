@@ -192,12 +192,14 @@ contract RUSD is
     /**
      * @notice Authorizes the upgrade of the contract.
      * @dev Inherited from UUPSUpgradeable.
+     * @dev This function is empty because we need only admin to authorize the upgrade.
      */
     function _authorizeUpgrade(address) internal view override onlyAdmin {}
 
     /**
      * @notice Authorizes the blacklist of the contract.
      * @dev Inherited from Blacklistable.
+     * @dev This function is empty because we need only admin to authorize the blacklist.
      */
     function _authorizeBlacklist() internal view override onlyAdmin {}
 

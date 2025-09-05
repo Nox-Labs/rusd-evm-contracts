@@ -471,6 +471,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
      * @notice Authorize the upgrade of the contract.
      * @param newImplementation The address of the new implementation.
      * @notice Emits Upgrade event.
+     * @dev This function is empty because we need only admin to authorize the upgrade.
      */
     function _authorizeUpgrade(address newImplementation) internal override onlyAdmin {}
 

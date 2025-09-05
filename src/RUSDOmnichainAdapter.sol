@@ -43,6 +43,7 @@ contract RUSDOmnichainAdapter is
      * @param _lzEndpoint The address of the LayerZero endpoint.
      * @dev Set the endpoint address in the immutable endpoint variable.
      * @dev This will work properly with proxy contract because the immutable variable works like a constant.
+     * @dev This function is empty because we only need to call the parent constructor.
      */
     constructor(address _lzEndpoint) OAppUpgradeable(_lzEndpoint) {}
 
