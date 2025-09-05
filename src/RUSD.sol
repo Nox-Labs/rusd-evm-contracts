@@ -58,7 +58,7 @@ contract RUSD is
         public
         onlyMinter
         noZeroAmount(amount)
-        noZeroBytes(data)
+        noEmptyBytes(data)
         noCrossChain(data)
         noPauseLevel(PauseLevel.High)
     {
@@ -76,7 +76,7 @@ contract RUSD is
         public
         onlyMinter
         noZeroAmount(amount)
-        noZeroBytes(data)
+        noEmptyBytes(data)
         noPauseLevel(PauseLevel.High)
         noCrossChain(data)
     {

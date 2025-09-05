@@ -152,7 +152,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         noPauseLevel(PauseLevel.High)
         noZeroAmount(amount)
         noZeroAddress(user)
-        noZeroBytes(data)
+        noEmptyBytes(data)
     {
         _getRusd().safeTransferFrom(msg.sender, address(this), amount);
         _mint(user, amount);
@@ -173,7 +173,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         noPauseLevel(PauseLevel.High)
         noZeroAmount(amount)
         noZeroAddress(user)
-        noZeroBytes(data)
+        noEmptyBytes(data)
     {
         _burn(user, amount);
         _getRusd().safeTransfer(msg.sender, amount);

@@ -7,7 +7,7 @@ abstract contract Base is Initializable {
     error ZeroAddress();
     error ZeroAmount();
     error Unauthorized();
-    error ZeroBytes();
+    error EmptyBytes();
     error Paused();
 
     constructor() {
@@ -24,8 +24,8 @@ abstract contract Base is Initializable {
         _;
     }
 
-    modifier noZeroBytes(bytes calldata _bytes) {
-        if (_bytes.length == 0) revert ZeroBytes();
+    modifier noEmptyBytes(bytes calldata _bytes) {
+        if (_bytes.length == 0) revert EmptyBytes();
         _;
     }
 }

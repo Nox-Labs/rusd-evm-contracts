@@ -63,7 +63,7 @@ contract Stake is YUSDSetup {
     }
 
     function test_RevertIfZeroBytes() public {
-        vm.expectRevert(Base.ZeroBytes.selector);
+        vm.expectRevert(Base.EmptyBytes.selector);
         yusd.stake(address(this), MINT_AMOUNT, "");
     }
 

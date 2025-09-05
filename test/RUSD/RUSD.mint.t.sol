@@ -110,7 +110,7 @@ contract Mint is RUSDSetup {
     }
 
     function test_RevertIfZeroBytesWithData() public {
-        vm.expectRevert(Base.ZeroBytes.selector);
+        vm.expectRevert(Base.EmptyBytes.selector);
         rusd.mint(address(this), MINT_AMOUNT, "");
     }
 

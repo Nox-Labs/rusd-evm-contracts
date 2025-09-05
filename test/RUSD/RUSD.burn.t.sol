@@ -79,7 +79,7 @@ contract Burn is RUSDSetup {
     }
 
     function test_RevertIfZeroBytesWithData() public {
-        vm.expectRevert(Base.ZeroBytes.selector);
+        vm.expectRevert(Base.EmptyBytes.selector);
         rusd.burn(MINT_AMOUNT, "");
     }
 

@@ -29,7 +29,7 @@ contract Redeem is YUSDSetup {
     }
 
     function test_RevertIfZeroBytes() public {
-        vm.expectRevert(Base.ZeroBytes.selector);
+        vm.expectRevert(Base.EmptyBytes.selector);
         yusd.redeem(address(this), MINT_AMOUNT, "");
     }
 
