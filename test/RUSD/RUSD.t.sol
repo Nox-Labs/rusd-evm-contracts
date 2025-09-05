@@ -45,7 +45,9 @@ contract RUSDTest is RUSDSetup {
 
     function test_transfer_RevertIfFromIsBlacklisted() public {
         rusd.blacklist(address(this));
-        vm.expectRevert(abi.encodeWithSelector(Blacklistable.Blacklist.selector, address(this)));
+        vm.expectRevert(
+            abi.encodeWithSelector(Blacklistable.BlacklistedAccount.selector, address(this))
+        );
         rusd.transfer(user, 100);
     }
 

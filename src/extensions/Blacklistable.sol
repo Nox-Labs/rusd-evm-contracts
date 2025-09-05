@@ -65,7 +65,7 @@ abstract contract Blacklistable is Initializable {
     }
 
     modifier notBlacklisted(address account) {
-        if (_isBlacklisted(account)) revert Blacklist(account);
+        if (_isBlacklisted(account)) revert BlacklistedAccount(account);
         _;
     }
 
@@ -76,7 +76,7 @@ abstract contract Blacklistable is Initializable {
 
     /* ======== ERRORS ======== */
 
-    error Blacklist(address account);
+    error BlacklistedAccount(address account);
 
     error AccountAlreadyBlacklisted(address account);
     error AccountNotBlacklisted(address account);
