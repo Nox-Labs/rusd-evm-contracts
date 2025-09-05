@@ -23,8 +23,7 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
  * @notice During the rounds, staker's balance is tracked by TWAB
  * and rewards are calculated based on the average balance of the staker in the round.
  * After the round is finalized, the RUSD rewards are transferred to the YUSD contract from the admin.
- * Also stakers can claim rewards during the round, but this creates a debt on the YUSD contract,
- * so it's impossible to redeem all YUSD and claim all rewards while admin didn't finalize the current round.
+ * Stakers can't claim rewards during the current round.
  * @notice All actions are allowed only for minter except for admin functionalities.
  */
 contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
@@ -64,13 +63,6 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
      * @notice The precision of the internal math.
      */
     uint128 constant INTERNAL_MATH_PRECISION = 1e30;
-
-    /**
-     * @notice The total debt of the YUSD contract in RUSD to all users (not including the current round)
-     * @notice If totalDebt is positive, it means surplus of RUSD on YUSD contract. (All users can redeem and claim `totalDebt` as rewards) (If all users redeem and claim rewards, the debt will be zero)
-     * @notice If totalDebt is negative, it means shortfall of RUSD on YUSD contract. (All users can't redeem and claim whole rewards)
-     */
-    int256 public totalDebt;
 
     /**
      * @notice The timestamps of the rounds.
@@ -342,8 +334,8 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         noZeroAddress(to)
         noZeroAmount(amount)
     {
+        if (roundId == getCurrentRoundId()) revert RoundNotEnded();
         _roundInfo[roundId].claimedRewards[user] += amount;
-        totalDebt -= int256(amount);
         _getRusd().safeTransfer(to, amount);
     }
 
@@ -448,7 +440,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
      * @dev This function will increase the total debt of the YUSD contract.
      * @notice Emits RoundFinalized event.
      */
-    function finalizeRound(uint32 roundId) external onlyAdmin {
+    function finalizeRound(uint32 roundId) public onlyAdmin {
         RoundInfo storage round = _roundInfo[roundId];
 
         (, uint32 end) = getRoundPeriod(roundId);
@@ -461,10 +453,23 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         round.isFinalized = true;
 
         uint256 totalRewards = calculateTotalRewardsRound(roundId);
-        totalDebt += int256(totalRewards);
         _getRusd().safeTransferFrom(msg.sender, address(this), totalRewards);
 
         emit RoundFinalized(roundId, totalRewards);
+    }
+
+    /**
+     * @notice Finalize the round and change the basis points of the round.
+     * @notice Emits RoundBpChanged event.
+     */
+    function finalizeRound(uint32 roundId, uint32 bpForRound) public onlyAdmin {
+        RoundInfo storage round = _roundInfo[roundId];
+
+        round.bp = bpForRound;
+        round.isBpSet = true;
+        emit RoundBpChanged(roundId, bpForRound);
+
+        finalizeRound(roundId);
     }
 
     /**

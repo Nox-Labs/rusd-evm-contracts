@@ -96,38 +96,6 @@ contract YUSDTest is YUSDSetup {
         assertEq(duration1, roundId1NewDuration);
     }
 
-    /* ======== totalDebt ======== */
-
-    function testFuzz_totalDebt_ShouldDecreaseWhenRewardsAreClaimed(uint256 period) public {
-        period = bound(period, twabPeriodLength, roundDuration);
-
-        yusd.stake(address(this), MINT_AMOUNT, mockData);
-
-        int256 totalDebtBefore = yusd.totalDebt();
-        assertEq(totalDebtBefore, 0);
-
-        skip(period);
-
-        uint256 claimedRewards = yusd.claimRewards(currentRoundId, address(this), address(this));
-
-        int256 totalDebtAfter = yusd.totalDebt();
-
-        assertLt(totalDebtAfter, totalDebtBefore);
-        assertEq(totalDebtAfter, -int256(claimedRewards));
-    }
-
-    function test_totalDebt_ShouldIncreaseAfterRoundIsFinalized() public {
-        yusd.stake(address(this), MINT_AMOUNT, mockData);
-
-        skip(roundDuration);
-        yusd.claimRewards(currentRoundId, address(this), address(this));
-
-        assertEq(yusd.totalDebt(), -int256(yusd.calculateTotalRewardsRound(currentRoundId)));
-
-        yusd.finalizeRound(currentRoundId);
-        assertEq(yusd.totalDebt(), 0);
-    }
-
     /* ======== decimals ======== */
 
     function test_decimals_ShouldReturnDecimals() public view {

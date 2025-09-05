@@ -32,6 +32,37 @@ contract FinalizeRound is YUSDSetup {
         assertEq(isFinalized, true);
     }
 
+    function testFuzz_ShouldRecalculateRewardsWithNewBp(uint256 amount) public {
+        amount = bound(amount, 10, MINT_AMOUNT);
+        yusd.stake(address(this), uint96(amount), mockData);
+        skip(roundDuration);
+
+        assertApproxEqAbs(
+            yusd.calculateTotalRewardsRound(currentRoundId), _multiplyAmountByBp(amount), dust
+        );
+
+        yusd.finalizeRound(currentRoundId, ROUND_BP / 2);
+
+        assertApproxEqAbs(
+            yusd.calculateTotalRewardsRound(currentRoundId), _multiplyAmountByBp(amount) / 2, dust
+        );
+    }
+
+    function test_ShouldFinalizeRoundAndChangeBp(uint256 amount) public {
+        amount = bound(amount, 1, MINT_AMOUNT);
+        yusd.stake(address(this), uint96(amount), mockData);
+        skip(roundDuration);
+
+        (uint32 bpBefore,,) = yusd.getRoundInfo(currentRoundId);
+
+        uint32 newBp = bpBefore + 100;
+
+        yusd.finalizeRound(currentRoundId, newBp);
+
+        (uint32 bpAfter,,) = yusd.getRoundInfo(currentRoundId);
+        assertEq(bpAfter, newBp);
+    }
+
     function test_RevertIfRoundNotEnded() public {
         vm.expectRevert(IYUSD.RoundNotEnded.selector);
         yusd.finalizeRound(currentRoundId);

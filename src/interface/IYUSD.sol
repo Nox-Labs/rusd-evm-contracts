@@ -13,6 +13,7 @@ interface IYUSD is IERC20Metadata {
         returns (uint256 amount);
     function compoundRewards(uint32 roundId, address user) external;
     function finalizeRound(uint32 roundId) external;
+    function finalizeRound(uint32 roundId, uint32 bpForRound) external;
     function changeNextRoundDuration(uint32 duration) external;
     function changeNextRoundBp(uint32 bp) external;
 
