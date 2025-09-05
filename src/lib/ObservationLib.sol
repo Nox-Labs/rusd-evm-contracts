@@ -34,8 +34,8 @@ library ObservationLib {
      * @dev  If `_newestObservationIndex` is less than `_oldestObservationIndex`, it means that we've wrapped around the circular buffer.
      *       So the most recent observation will be at `_oldestObservationIndex + _cardinality - 1`, at the beginning of the circular buffer.
      * @param _observations List of Observations to search through.
-     * @param _newestObservationIndex Index of the newest Observation. Right side of the circular buffer.
-     * @param _oldestObservationIndex Index of the oldest Observation. Left side of the circular buffer.
+     * @param _newestObservationIndex Index of the newest Observation. Right side of the ring buffer.
+     * @param _oldestObservationIndex Index of the oldest Observation. Left side of the ring buffer.
      * @param _target Timestamp at which we are searching the Observation.
      * @param _cardinality Cardinality of the circular buffer we are searching through.
      * @return beforeOrAt Observation recorded before, or at, the target.
