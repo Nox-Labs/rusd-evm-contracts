@@ -152,17 +152,17 @@ library TwabLib {
     }
 
     /**
-     * @notice Looks up the oldest observation in the circular buffer.
-     * @param _observations The circular buffer of observations
+     * @notice Looks up the oldest observation in the ring buffer.
+     * @param _observations The ring buffer of observations
      * @param _accountDetails The account details to query with
      * @return index The index of the oldest observation
-     * @return observation The oldest observation in the circular buffer
+     * @return observation The oldest observation in the ring buffer
      */
     function getOldestObservation(
         ObservationLib.Observation[MAX_CARDINALITY] storage _observations,
         AccountDetails memory _accountDetails
     ) internal view returns (uint16 index, ObservationLib.Observation memory observation) {
-        // If the circular buffer has not been fully populated, we go to the beginning of the buffer at index 0.
+        // If the ring buffer has not been fully populated, we go to the beginning of the buffer at index 0.
         if (_accountDetails.bufferCount < MAX_CARDINALITY) {
             index = 0;
             observation = _observations[0];
@@ -173,11 +173,11 @@ library TwabLib {
     }
 
     /**
-     * @notice Looks up the newest observation in the circular buffer.
-     * @param _observations The circular buffer of observations
+     * @notice Looks up the newest observation in the ring buffer.
+     * @param _observations The ring buffer of observations
      * @param _accountDetails The account details to query with
      * @return index The index of the newest observation
-     * @return observation The newest observation in the circular buffer
+     * @return observation The newest observation in the ring buffer
      */
     function getNewestObservation(
         ObservationLib.Observation[MAX_CARDINALITY] storage _observations,
@@ -193,7 +193,7 @@ library TwabLib {
      * @dev Ensure timestamps are safe using requireFinalized
      * @param periodLength The length of an overwrite period
      * @param periodOffset The offset of the first period
-     * @param _observations The circular buffer of observations
+     * @param _observations The ring buffer of observations
      * @param _accountDetails The account details to query with
      * @param _targetTime The time to look up the balance at
      * @return balance The balance at the target time
@@ -253,7 +253,7 @@ library TwabLib {
      * @dev If the timestamps in the range are not exact matches of observations, the balance is extrapolated using the previous observation.
      * @param periodLength The length of an overwrite period
      * @param periodOffset The offset of the first period
-     * @param _observations The circular buffer of observations
+     * @param _observations The ring buffer of observations
      * @param _accountDetails The account details to query with
      * @param _startTime The start of the time range
      * @param _endTime The end of the time range
@@ -388,15 +388,15 @@ library TwabLib {
     }
 
     /**
-     * @notice Looks up the next observation index to write to in the circular buffer.
+     * @notice Looks up the next observation index to write to in the ring buffer.
      * @dev If the current time is in the same period as the newest observation, we overwrite it.
      * @dev If the current time is in a new period, we increment the index and write a new observation.
      * @param periodLength The length of an overwrite period
      * @param periodOffset The offset of the first period
-     * @param _observations The circular buffer of observations
+     * @param _observations The ring buffer of observations
      * @param _accountDetails The account details to query with
      * @return index The index of the next observation slot to overwrite
-     * @return newestObservation The newest observation in the circular buffer
+     * @return newestObservation The newest observation in the ring buffer
      * @return isNew True if the observation slot is new, false if we're overwriting
      */
     function _getNextObservationIndex(
@@ -528,7 +528,7 @@ library TwabLib {
     /**
      * @notice Looks up the newest observation before or at a given timestamp.
      * @dev If an observation is available at the target time, it is returned. Otherwise, the newest observation before the target time is returned.
-     * @param _observations The circular buffer of observations
+     * @param _observations The ring buffer of observations
      * @param _accountDetails The account details to query with
      * @param _offsetTargetTime The timestamp to look up (offset by the period offset)
      * @return prevOrAtObservation The observation

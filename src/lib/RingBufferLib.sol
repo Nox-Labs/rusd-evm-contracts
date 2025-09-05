@@ -10,10 +10,10 @@ pragma solidity ^0.8.0;
 library RingBufferLib {
     /**
      * @notice Returns wrapped TWAB index.
-     * @dev  In order to navigate the TWAB circular buffer, we need to use the modulo operator.
-     * @dev  For example, if `_index` is equal to 32 and the TWAB circular buffer is of `_cardinality` 32,
+     * @dev  In order to navigate the TWAB ring buffer, we need to use the modulo operator.
+     * @dev  For example, if `_index` is equal to 32 and the TWAB ring buffer is of `_cardinality` 32,
      *       it will return 0 and will point to the first element of the array.
-     * @param _index Index used to navigate through the TWAB circular buffer.
+     * @param _index Index used to navigate through the TWAB ring buffer.
      * @param _cardinality TWAB buffer cardinality.
      * @return TWAB index.
      */

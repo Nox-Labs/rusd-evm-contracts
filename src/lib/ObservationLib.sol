@@ -31,13 +31,13 @@ library ObservationLib {
      * The result may be the same Observation, or adjacent Observations.
      * @dev The _target must fall within the boundaries of the provided _observations.
      * Meaning the _target must be: older than the most recent Observation and younger, or the same age as, the oldest Observation.
-     * @dev  If `_newestObservationIndex` is less than `_oldestObservationIndex`, it means that we've wrapped around the circular buffer.
-     *       So the most recent observation will be at `_oldestObservationIndex + _cardinality - 1`, at the beginning of the circular buffer.
+     * @dev  If `_newestObservationIndex` is less than `_oldestObservationIndex`, it means that we've wrapped around the ring buffer.
+     *       So the most recent observation will be at `_oldestObservationIndex + _cardinality - 1`, at the beginning of the ring buffer.
      * @param _observations List of Observations to search through.
      * @param _newestObservationIndex Index of the newest Observation. Right side of the ring buffer.
      * @param _oldestObservationIndex Index of the oldest Observation. Left side of the ring buffer.
      * @param _target Timestamp at which we are searching the Observation.
-     * @param _cardinality Cardinality of the circular buffer we are searching through.
+     * @param _cardinality Cardinality of the ring buffer we are searching through.
      * @return beforeOrAt Observation recorded before, or at, the target.
      * @return beforeOrAtIndex Index of observation recorded before, or at, the target.
      * @return afterOrAt Observation recorded at, or after, the target.
