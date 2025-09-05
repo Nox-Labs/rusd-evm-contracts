@@ -10,6 +10,7 @@ contract ClaimRewards is YUSDSetup {
         yusd.stake(address(this), MINT_AMOUNT, mockData);
         (, uint32 end) = yusd.getRoundPeriod(currentRoundId);
         vm.warp(end);
+        _finalizeCurrentRound();
     }
 
     function test_ShouldClaimAllRewardsForRound() public {

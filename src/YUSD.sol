@@ -141,7 +141,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         external
         updateRoundTimestamps
         onlyMinter
-        noPauseLevel(PauseLevel.High)
+        noPauseLevel(PauseLevel.Medium)
         noZeroAmount(amount)
         noZeroAddress(user)
         noEmptyBytes(data)
@@ -162,7 +162,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
         external
         updateRoundTimestamps
         onlyMinter
-        noPauseLevel(PauseLevel.High)
+        noPauseLevel(PauseLevel.Medium)
         noZeroAmount(amount)
         noZeroAddress(user)
         noEmptyBytes(data)
@@ -330,11 +330,11 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
      */
     function _claimRewards(uint32 roundId, address user, uint256 amount, address to)
         private
-        noPauseLevel(PauseLevel.High)
+        noPauseLevel(PauseLevel.Medium)
         noZeroAddress(to)
         noZeroAmount(amount)
     {
-        if (roundId == getCurrentRoundId()) revert RoundNotEnded();
+        if (!_roundInfo[roundId].isFinalized) revert RoundNotFinalized();
         _roundInfo[roundId].claimedRewards[user] += amount;
         _getRusd().safeTransfer(to, amount);
     }
@@ -424,13 +424,7 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
      * @notice Emits RoundBpChanged event.
      */
     function changeNextRoundBp(uint32 bp) external onlyAdmin {
-        if (bp > BP_PRECISION) revert InvalidBp();
-
-        uint32 nextRoundId = getCurrentRoundId() + 1;
-        _roundInfo[nextRoundId].bp = bp;
-        _roundInfo[nextRoundId].isBpSet = true;
-
-        emit RoundBpChanged(nextRoundId, bp);
+        _updateBpForRound(getCurrentRoundId() + 1, bp);
     }
 
     /**
@@ -463,13 +457,15 @@ contract YUSD is IYUSD, TWAB, RUSDDataHubKeeper, UUPSUpgradeable {
      * @notice Emits RoundBpChanged event.
      */
     function finalizeRound(uint32 roundId, uint32 bpForRound) public onlyAdmin {
-        RoundInfo storage round = _roundInfo[roundId];
-
-        round.bp = bpForRound;
-        round.isBpSet = true;
-        emit RoundBpChanged(roundId, bpForRound);
-
+        _updateBpForRound(roundId, bpForRound);
         finalizeRound(roundId);
+    }
+
+    function _updateBpForRound(uint32 roundId, uint32 bp) private {
+        if (bp > BP_PRECISION) revert InvalidBp();
+        _roundInfo[roundId].bp = bp;
+        _roundInfo[roundId].isBpSet = true;
+        emit RoundBpChanged(roundId, bp);
     }
 
     /**

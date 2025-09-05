@@ -36,6 +36,7 @@ interface IYUSD is IERC20Metadata {
 
     error RoundIdUnavailable();
     error RoundNotEnded();
+    error RoundNotFinalized();
     error RoundAlreadyFinalized();
     error InsufficientRewards(uint256 amount, uint256 claimableRewards);
     error InvalidBp();

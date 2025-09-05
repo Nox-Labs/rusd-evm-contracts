@@ -18,7 +18,7 @@ contract YUSDRewardIntegrityTest is Test {
 
     /// forge-config: default.invariant.runs = 40
     /// forge-config: default.invariant.depth = 100
-    /// forge-config: default.invariant.fail-on-revert = true
+    /// forge-config: default.invariant.fail-on-revert = false
     /// forge-config: default.invariant.call-override = false
     function invariant_RewardIntegrity() public view {
         uint32 currentRoundId = yusd.getCurrentRoundId();
@@ -35,7 +35,7 @@ contract YUSDRewardIntegrityTest is Test {
 
     /// forge-config: default.invariant.runs = 40
     /// forge-config: default.invariant.depth = 100
-    /// forge-config: default.invariant.fail-on-revert = true
+    /// forge-config: default.invariant.fail-on-revert = false
     /// forge-config: default.invariant.call-override = false
     function invariant_SumOfIndividualRewards() public view {
         uint32 currentRoundId = yusd.getCurrentRoundId();

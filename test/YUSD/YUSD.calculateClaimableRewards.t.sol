@@ -8,7 +8,7 @@ contract CalculateClaimableRewards is YUSDSetup {
         rusd.mint(address(yusd), MINT_AMOUNT * 100, mockData);
 
         yusd.stake(address(this), MINT_AMOUNT, mockData);
-        skip(roundDuration + 1);
+        skip(roundDuration);
     }
 
     function test_ShouldReturnZeroIfNoRewards() public view {
@@ -27,6 +27,8 @@ contract CalculateClaimableRewards is YUSDSetup {
         uint256 claimableRewards = yusd.calculateClaimableRewards(currentRoundId, address(this));
 
         amount = bound(amount, 1, claimableRewards);
+
+        _finalizeCurrentRound();
 
         yusd.claimRewards(currentRoundId, address(this), address(this), amount);
 
